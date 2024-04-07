@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -14,14 +14,15 @@ import { Input } from "@/components/ui/input";
 
 type DataInputType = {
   row: string;
-  values: number[];
+  values: [any]; // refs
 };
 
 export const DataInput = () => {
   const [rows, setRows] = useState<string[]>(["X"]);
   const [columns, setColumns] = useState<number>(1);
   const [noColumns, setNoColumns] = useState<number>(1);
-  const [data, setData] = useState<DataInputType[]>([]);
+  const [data, setData] = useState<any>([]);
+  const cellRefs = useRef<any>({});
 
   const memoizedData = useMemo(() => data, [data]);
 
@@ -35,27 +36,36 @@ export const DataInput = () => {
 
   const removeRow = () => {
     if (rows.length === 1) return;
+
     let variable = rows.pop();
     if (!variable) return;
 
     STATISTIC_VARIABLES.unshift();
     setRows([...rows]);
     setColumns(columns - 1);
-    const newData = memoizedData.filter((row) => row.row !== variable);
+
+    const newData = memoizedData.filter((row: any) => row.row !== variable);
     setData(newData);
   };
 
   const removeColumn = () => {
     if (noColumns === 1) return;
     setNoColumns(noColumns - 1);
-    const newData = memoizedData.map((row) => {
+    const newData = memoizedData.map((row: any) => {
       return {
         ...row,
         values: row.values.slice(0, -1),
       };
     });
-
     setData(newData);
+  };
+
+  const getData = () => {
+    data.map((item: any, index: any) => {
+      item.values.map((val: any) => {
+        console.log(`${index}: ${val.value}`);
+      });
+    });
   };
 
   return (
@@ -64,7 +74,7 @@ export const DataInput = () => {
         <Table>
           <TableCaption className="mb-12">
             <div className="flex flex-col items-center">
-              <Button variant={"secondary"} className="w-24">
+              <Button variant={"secondary"} className="w-24" onClick={getData}>
                 Send
               </Button>
               <p>Place your data input here</p>
@@ -88,26 +98,44 @@ export const DataInput = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Array.from(Array(noColumns).keys()).map((column) => (
-              <TableRow key={column} className="flex flex-row">
+            {Array.from(Array(noColumns).keys()).map((_column, idx) => (
+              <TableRow key={_column} className="flex flex-row">
                 {Array.from(Array(columns).keys()).map((column) => (
                   <TableCell key={column}>
                     <Input
-                      type="text"
+                      type="number"
                       className="w-20 text-center"
-                      onChange={(event) => {
-                        const newValue = event.currentTarget.value;
-                        const existingRow = memoizedData.find(
-                          (row) => row.row === rows[column]
+                      id={`cell-${rows[column]}-${idx}`}
+                      ref={(el) =>
+                        (cellRefs.current[`${rows[column]}-${idx}`] = el)
+                      }
+                      onInput={(event) => {
+                        const existingRowIndex = memoizedData.findIndex(
+                          (row: any) => row.row === rows[column]
                         );
+                        const existingRow =
+                          existingRowIndex !== -1
+                            ? memoizedData[existingRowIndex]
+                            : undefined;
 
-                        let newData;
+                        let newData = [] as DataInputType[];
                         if (existingRow) {
-                          newData = memoizedData.map((row) => {
+                          newData = memoizedData.map((row: any) => {
                             if (row.row === rows[column]) {
+                              if (
+                                row.values.find(
+                                  (c: any) =>
+                                    c ===
+                                    cellRefs.current[`${rows[column]}-${idx}`]
+                                )
+                              )
+                                return row;
                               return {
-                                ...row,
-                                values: [...row.values, Number(newValue)],
+                                row: row.row,
+                                values: [
+                                  ...row.values,
+                                  cellRefs.current[`${rows[column]}-${idx}`],
+                                ],
                               };
                             }
                             return row;
@@ -117,7 +145,9 @@ export const DataInput = () => {
                             ...memoizedData,
                             {
                               row: rows[column],
-                              values: [Number(newValue)],
+                              values: [
+                                cellRefs.current[`${rows[column]}-${idx}`],
+                              ],
                             },
                           ];
                         }
