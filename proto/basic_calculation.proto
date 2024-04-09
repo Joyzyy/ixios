@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package basic_calculation;
+
+option go_package = "./pb";
+
+service BasicCalculation {
+
+}
