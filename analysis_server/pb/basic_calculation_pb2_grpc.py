@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import basic_calculation_pb2 as basic__calculation__pb2
+import pb.basic_calculation_pb2 as basic__calculation__pb2
 
 
 class BasicCalculationStub(object):

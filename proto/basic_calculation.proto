@@ -5,5 +5,18 @@ package basic_calculation;
 option go_package = "./pb";
 
 service BasicCalculation {
+  rpc Add(BCRequest) returns (BCResponse);
+}
 
+message DataInputType {
+  string row = 1;
+  repeated int64 values = 2;
+}
+
+message BCRequest {
+  repeated DataInputType data = 1;
+}
+
+message BCResponse {
+  int64 result = 1;
 }

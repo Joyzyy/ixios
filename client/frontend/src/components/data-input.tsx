@@ -6,24 +6,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useMemo, useRef } from "react";
+import { useMemo, useRef, useState, MutableRefObject } from "react";
 import { STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import { Add } from "../../wailsjs/go/main/App";
+import { pb } from "../../wailsjs/go/models";
+import BCRequest = pb.BCRequest;
 
 type DataInputType = {
   row: string;
-  values: [any]; // refs
+  values: MutableRefObject<any>[]; // refs
 };
 
 export const DataInput = () => {
   const [rows, setRows] = useState<string[]>(["X"]);
   const [columns, setColumns] = useState<number>(1);
   const [noColumns, setNoColumns] = useState<number>(1);
-  const [data, setData] = useState<any>([]);
+  const [data, setData] = useState<DataInputType[]>([]);
   const cellRefs = useRef<any>({});
-
   const memoizedData = useMemo(() => data, [data]);
 
   const addRow = () => {
@@ -44,14 +46,14 @@ export const DataInput = () => {
     setRows([...rows]);
     setColumns(columns - 1);
 
-    const newData = memoizedData.filter((row: any) => row.row !== variable);
+    const newData = memoizedData.filter((row) => row.row !== variable);
     setData(newData);
   };
 
   const removeColumn = () => {
     if (noColumns === 1) return;
     setNoColumns(noColumns - 1);
-    const newData = memoizedData.map((row: any) => {
+    const newData = memoizedData.map((row) => {
       return {
         ...row,
         values: row.values.slice(0, -1),
@@ -60,12 +62,55 @@ export const DataInput = () => {
     setData(newData);
   };
 
-  const getData = () => {
-    data.map((item: any, index: any) => {
-      item.values.map((val: any) => {
-        console.log(`${index}: ${val.value}`);
+  const handleInputData = (column: number, i: number) => {
+    const existingRowIndex = memoizedData.findIndex(
+      (row) => row.row === rows[column],
+    );
+    const existingRow =
+      existingRowIndex !== -1 ? memoizedData[existingRowIndex] : undefined;
+    let newData = [] as DataInputType[];
+    let currentRef = cellRefs.current[`${rows[column]}-${i}`];
+    if (existingRow) {
+      newData = memoizedData.map((row) => {
+        if (row.row === rows[column]) {
+          if (row.values.find((c) => c === currentRef)) return row;
+          return {
+            row: row.row,
+            values: [...row.values, currentRef],
+          };
+        }
+        return row;
       });
+    } else {
+      newData = [
+        ...memoizedData,
+        {
+          row: rows[column],
+          values: [currentRef],
+        },
+      ];
+    }
+
+    setData(newData);
+  };
+
+  const getData = async () => {
+    console.time("perf");
+    // handle DataInputType[] to pb.Request
+    let pbRequestData = {
+      data: data.map((item) => {
+        return {
+          row: item.row,
+          values: item.values.map((ref: any) => Number(ref.value)),
+        };
+      }),
+    } as BCRequest;
+
+    await Add(pbRequestData).then((res) => {
+      console.info(res);
     });
+    console.timeEnd("perf");
+    console.log("asdsadasdsadwqeqweqwe");
   };
 
   return (
@@ -109,51 +154,7 @@ export const DataInput = () => {
                       ref={(el) =>
                         (cellRefs.current[`${rows[column]}-${idx}`] = el)
                       }
-                      onInput={(event) => {
-                        const existingRowIndex = memoizedData.findIndex(
-                          (row: any) => row.row === rows[column]
-                        );
-                        const existingRow =
-                          existingRowIndex !== -1
-                            ? memoizedData[existingRowIndex]
-                            : undefined;
-
-                        let newData = [] as DataInputType[];
-                        if (existingRow) {
-                          newData = memoizedData.map((row: any) => {
-                            if (row.row === rows[column]) {
-                              if (
-                                row.values.find(
-                                  (c: any) =>
-                                    c ===
-                                    cellRefs.current[`${rows[column]}-${idx}`]
-                                )
-                              )
-                                return row;
-                              return {
-                                row: row.row,
-                                values: [
-                                  ...row.values,
-                                  cellRefs.current[`${rows[column]}-${idx}`],
-                                ],
-                              };
-                            }
-                            return row;
-                          });
-                        } else {
-                          newData = [
-                            ...memoizedData,
-                            {
-                              row: rows[column],
-                              values: [
-                                cellRefs.current[`${rows[column]}-${idx}`],
-                              ],
-                            },
-                          ];
-                        }
-
-                        setData(newData);
-                      }}
+                      onInput={() => handleInputData(column, idx)}
                     />
                   </TableCell>
                 ))}

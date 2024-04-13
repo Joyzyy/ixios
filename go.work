@@ -2,6 +2,6 @@ go 1.22.2
 
 use (
 	./client
-	./proto
+	./pb
 	./server
 )

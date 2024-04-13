@@ -1,3 +1,3 @@
-module github.com/Joyzyy/Ixios-Server
+module ixios-server
 
 go 1.22.2

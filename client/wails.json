@@ -4,7 +4,7 @@
   "outputfilename": "client",
   "frontend:install": "bun i",
   "frontend:build": "bun run build",
-  "frontend:dev:watcher": "bun run dev",
+  "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "Joyzyy",
