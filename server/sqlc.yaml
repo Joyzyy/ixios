@@ -1,10 +1,10 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "db/queries/test_query.sql"
-    schema: "db/schemas/test.sql"
+    queries: "db/sqlc/queries/"
+    schema: "db/sqlc/schemas/"
     gen:
       go:
-        package: "sqlc_db"
-        out: "db"
+        package: "sqlcdb"
+        out: "db/sqlc"
         sql_package: "pgx/v5"

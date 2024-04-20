@@ -3,7 +3,7 @@ module ixios
 go 1.22.2
 
 require (
-	github.com/wailsapp/wails/v2 v2.8.0
+	github.com/wailsapp/wails/v2 v2.8.1
 	google.golang.org/grpc v1.63.0
 )
 

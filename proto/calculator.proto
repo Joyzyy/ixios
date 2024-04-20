@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "./pb";
+
+service Calculator {
+    rpc Subtract(CalculatorRequest) returns (CalculatorResponse);
+}
+
+message CalculatorRequest {
+    int64 a = 1;
+    int64 b = 2;
+}
+
+message CalculatorResponse {
+    int64 res = 1;
+}

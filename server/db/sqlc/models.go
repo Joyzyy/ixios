@@ -2,9 +2,14 @@
 // versions:
 //   sqlc v1.26.0
 
-package sqlc_db
+package sqlcdb
 
-type Sqlctest struct {
+type TestSchema struct {
 	ID       int64
 	FreeText string
+}
+
+type TestSchema2 struct {
+	ID        int64
+	FreeText2 string
 }

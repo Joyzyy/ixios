@@ -1,4 +1,0 @@
-CREATE TABLE SQLCTest(
-    id BIGSERIAL PRIMARY KEY,
-    free_text TEXT NOT NULL
-);

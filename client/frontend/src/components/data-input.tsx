@@ -20,6 +20,8 @@ type DataInputType = {
   values: MutableRefObject<any>[]; // refs
 };
 
+let removedVariables: string[] = [];
+
 export const DataInput = () => {
   const [rows, setRows] = useState<string[]>(["X"]);
   const [columns, setColumns] = useState<number>(1);
@@ -29,7 +31,9 @@ export const DataInput = () => {
   const memoizedData = useMemo(() => data, [data]);
 
   const addRow = () => {
-    let variable = STATISTIC_VARIABLES.shift();
+    let variable = removedVariables.length
+      ? removedVariables.pop()
+      : STATISTIC_VARIABLES.shift();
     if (!variable) return;
 
     setRows([...rows, variable]);
@@ -42,6 +46,7 @@ export const DataInput = () => {
     let variable = rows.pop();
     if (!variable) return;
 
+    removedVariables.push(variable);
     STATISTIC_VARIABLES.unshift();
     setRows([...rows]);
     setColumns(columns - 1);
