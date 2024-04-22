@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package basic_calculation;
 
-option go_package = "./pb";
+option go_package = "./server/proto";
 
 service BasicCalculation {
   rpc Add(BCRequest) returns (BCResponse);

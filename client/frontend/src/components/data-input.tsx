@@ -11,11 +11,8 @@ import { STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Add } from "../../wailsjs/go/main/App";
-import { pb } from "../../wailsjs/go/models";
-import BCRequest = pb.BCRequest;
 
-type DataInputType = {
+type DataInputType_2 = {
   row: string;
   values: MutableRefObject<any>[]; // refs
 };
@@ -26,7 +23,7 @@ export const DataInput = () => {
   const [rows, setRows] = useState<string[]>(["X"]);
   const [columns, setColumns] = useState<number>(1);
   const [noColumns, setNoColumns] = useState<number>(1);
-  const [data, setData] = useState<DataInputType[]>([]);
+  const [data, setData] = useState<DataInputType_2[]>([]);
   const cellRefs = useRef<any>({});
   const memoizedData = useMemo(() => data, [data]);
 
@@ -69,11 +66,11 @@ export const DataInput = () => {
 
   const handleInputData = (column: number, i: number) => {
     const existingRowIndex = memoizedData.findIndex(
-      (row) => row.row === rows[column],
+      (row) => row.row === rows[column]
     );
     const existingRow =
       existingRowIndex !== -1 ? memoizedData[existingRowIndex] : undefined;
-    let newData = [] as DataInputType[];
+    let newData = [] as DataInputType_2[];
     let currentRef = cellRefs.current[`${rows[column]}-${i}`];
     if (existingRow) {
       newData = memoizedData.map((row) => {
@@ -100,8 +97,6 @@ export const DataInput = () => {
   };
 
   const getData = async () => {
-    console.time("perf");
-    // handle DataInputType[] to pb.Request
     let pbRequestData = {
       data: data.map((item) => {
         return {
@@ -109,13 +104,18 @@ export const DataInput = () => {
           values: item.values.map((ref: any) => Number(ref.value)),
         };
       }),
-    } as BCRequest;
+    };
 
-    await Add(pbRequestData).then((res) => {
-      console.info(res);
-    });
-    console.timeEnd("perf");
-    console.log("asdsadasdsadwqeqweqwe");
+    await fetch("http://127.0.0.1:8080/v1/data_input", {
+      method: "POST",
+      body: JSON.stringify(pbRequestData),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.error(err))
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => console.error(err));
   };
 
   return (

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"ixios-server/db"
 	"ixios-server/grpc"
+	rest "ixios-server/rest_api"
+	"ixios-server/rest_api/routes"
 	"log"
-	"net"
+	"net/http"
 
 	"github.com/joho/godotenv"
 )
@@ -15,26 +16,31 @@ func main() {
 	if err != nil {
 		log.Fatalf("encountered error while loading .env: %v", err)
 	}
+	log.Println("Loaded .env")
 
 	dbConn, err := db.InitDatabaseConnection()
 	if err != nil {
 		log.Fatalf("encountered error while initializing db: %v", err)
 	}
 	defer dbConn.Close()
+	log.Println("Connected to database")
 
-	grpcServer := grpc.InitializeGRPC()
-	listener, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		log.Fatalf("encountered error while initalizing tcp: %v", err)
-	}
-	defer grpcServer.Stop()
-	defer listener.Close()
-
-	log.Println("Starting gRPC server on port 8080!")
 	_ = db.InitDatabase(dbConn)
-	fmt.Printf("salut!")
 
-	if err = grpcServer.Serve(listener); err != nil {
-		log.Fatalf("encountered error while serving grpc server: %v", err)
+	gRPC, err := grpc.InitGrpcClient()
+	if err != nil {
+		log.Fatalf("encountered error while initialzing grpc: %v", err)
+	}
+	defer gRPC.Close()
+	log.Println("Initialized gRPC client")
+
+	router, server := rest.InitHttpServer(8080)
+	defer server.Close()
+	log.Println("Initialized HTTP server")
+
+	routes.DataInputRoutes(router, gRPC)
+
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("encountered error while initializing http server: %v", err)
 	}
 }
