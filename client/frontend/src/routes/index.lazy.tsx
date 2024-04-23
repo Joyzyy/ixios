@@ -1,35 +1,17 @@
-import { Button } from "@/components/ui/button";
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { useAtom } from "jotai";
+import { countAtom } from "@/features/atoms";
 
 export const Route = createLazyFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  function dismiss() {
-    console.log("got dismissed!");
-  }
-
+  const [count, setCount] = useAtom(countAtom);
   return (
-    <div className="p-2">
-      <h3>
-        <Button
-          onClick={() => {
-            toast("uh oh!", {
-              dismissible: true,
-              important: true,
-              description: "asomsomsamodasdasd",
-              action: {
-                label: "Undo",
-                onClick: dismiss,
-              },
-            });
-          }}
-        >
-          show sonner
-        </Button>
-      </h3>
-    </div>
+    <>
+      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
+      <div>Count: {count}</div>
+    </>
   );
 }

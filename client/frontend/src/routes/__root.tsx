@@ -1,7 +1,7 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Toaster } from "@/components/ui/sonner";
 import { MainMenu } from "@/components/menubar";
+import { DataInput } from "@/components/data-input";
 
 const DesktopNavigation: React.FC<{
   children: React.ReactNode;
@@ -9,33 +9,21 @@ const DesktopNavigation: React.FC<{
   return (
     <>
       <MainMenu />
-      <div className="border-t">
+      <div className="border-t overflow-hidden h-15">
         <div className="bg-background">
-          <div className="h-full">{children}</div>
+          <div>{children}</div>
         </div>
       </div>
     </>
   );
 };
 
-function Routes() {
-  return (
-    <>
-      <div className="p-2">
-        <Link to="/">Home</Link> <Link to="/about">About</Link>{" "}
-        <Link to="/data">Data</Link>
-      </div>
-    </>
-  );
-}
-
 const Root = () => {
   return (
     <>
-      <DesktopNavigation children={<Routes />} />
+      <DesktopNavigation children={<DataInput />} />
       <Outlet />
       <Toaster />
-      <TanStackRouterDevtools />
     </>
   );
 };

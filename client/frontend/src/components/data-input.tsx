@@ -18,11 +18,18 @@ type DataInputType_2 = {
 };
 
 let removedVariables: string[] = [];
+const numberPredetermined: number = 2;
+const NEW_STATISTIC_VARIABLES = STATISTIC_VARIABLES.slice(
+  numberPredetermined,
+  STATISTIC_VARIABLES.length
+);
 
 export const DataInput = () => {
-  const [rows, setRows] = useState<string[]>(["X"]);
-  const [columns, setColumns] = useState<number>(1);
-  const [noColumns, setNoColumns] = useState<number>(1);
+  const [rows, setRows] = useState<string[]>(
+    STATISTIC_VARIABLES.slice(0, numberPredetermined)
+  );
+  const [columns, setColumns] = useState<number>(numberPredetermined);
+  const [noColumns, setNoColumns] = useState<number>(numberPredetermined * 5);
   const [data, setData] = useState<DataInputType_2[]>([]);
   const cellRefs = useRef<any>({});
   const memoizedData = useMemo(() => data, [data]);
@@ -30,7 +37,7 @@ export const DataInput = () => {
   const addRow = () => {
     let variable = removedVariables.length
       ? removedVariables.pop()
-      : STATISTIC_VARIABLES.shift();
+      : NEW_STATISTIC_VARIABLES.shift();
     if (!variable) return;
 
     setRows([...rows, variable]);
@@ -44,7 +51,7 @@ export const DataInput = () => {
     if (!variable) return;
 
     removedVariables.push(variable);
-    STATISTIC_VARIABLES.unshift();
+    NEW_STATISTIC_VARIABLES.unshift();
     setRows([...rows]);
     setColumns(columns - 1);
 
@@ -119,74 +126,64 @@ export const DataInput = () => {
   };
 
   return (
-    <>
-      <ScrollArea>
-        <Table>
-          <TableCaption className="mb-12">
-            <div className="flex flex-col items-center">
-              <Button variant={"secondary"} className="w-24" onClick={getData}>
-                Send
-              </Button>
-              <p>Place your data input here</p>
-            </div>
-          </TableCaption>
-          <TableHeader>
-            <TableRow className="flex flex-row">
-              {rows.map((row) => (
-                <TableRow key={row}>
-                  <Button variant={"link"} disabled className="w-24">
-                    {row}
-                  </Button>
-                </TableRow>
-              ))}
-              <Button variant={"link"} onClick={addRow} className="w-24">
-                +
-              </Button>
-              <Button variant={"link"} onClick={removeRow} className="w-24">
-                -
-              </Button>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from(Array(noColumns).keys()).map((_column, idx) => (
-              <TableRow key={_column} className="flex flex-row">
-                {Array.from(Array(columns).keys()).map((column) => (
-                  <TableCell key={column}>
-                    <Input
-                      type="number"
-                      className="w-20 text-center"
-                      id={`cell-${rows[column]}-${idx}`}
-                      ref={(el) =>
-                        (cellRefs.current[`${rows[column]}-${idx}`] = el)
-                      }
-                      onInput={() => handleInputData(column, idx)}
-                    />
-                  </TableCell>
-                ))}
+    <ScrollArea>
+      <Table>
+        <TableHeader>
+          <TableRow className="flex flex-row">
+            {rows.map((row) => (
+              <TableRow key={row}>
+                <Button variant={"link"} disabled className="w-24">
+                  {row}
+                </Button>
               </TableRow>
             ))}
-            <TableRow>
-              <TableCell>
-                <Button
-                  variant={"link"}
-                  onClick={() => setNoColumns(noColumns + 1)}
-                  className="w-12 text-center"
-                >
-                  +
-                </Button>
-                <Button
-                  variant={"link"}
-                  onClick={removeColumn}
-                  className="w-12 text-center"
-                >
-                  -
-                </Button>
-              </TableCell>
+            <Button variant={"link"} onClick={addRow} className="w-24">
+              +
+            </Button>
+            <Button variant={"link"} onClick={removeRow} className="w-24">
+              -
+            </Button>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from(Array(noColumns).keys()).map((_column, idx) => (
+            <TableRow key={_column} className="flex flex-row">
+              {Array.from(Array(columns).keys()).map((column) => (
+                <TableCell key={column}>
+                  <Input
+                    type="number"
+                    className="w-20 text-center"
+                    id={`cell-${rows[column]}-${idx}`}
+                    ref={(el) =>
+                      (cellRefs.current[`${rows[column]}-${idx}`] = el)
+                    }
+                    onInput={() => handleInputData(column, idx)}
+                  />
+                </TableCell>
+              ))}
             </TableRow>
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </>
+          ))}
+          <TableRow>
+            <TableCell>
+              <Button
+                variant={"link"}
+                onClick={() => setNoColumns(noColumns + 1)}
+                className="w-12 text-center"
+              >
+                +
+              </Button>
+              <Button
+                variant={"link"}
+                onClick={removeColumn}
+                className="w-12 text-center"
+              >
+                -
+              </Button>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 };

@@ -81,6 +81,17 @@ export const MainMenu = () => {
           </MenubarSub>
         </MenubarContent>
       </MenubarMenu>
+      <MenubarMenu>
+        <MenubarTrigger>Action</MenubarTrigger>
+        <MenubarContent></MenubarContent>
+      </MenubarMenu>
+      <MenubarMenu>
+        <MenubarTrigger>Equation</MenubarTrigger>
+        <MenubarContent></MenubarContent>
+      </MenubarMenu>
+      <MenubarMenu>
+        <MenubarTrigger>Visualize</MenubarTrigger>
+      </MenubarMenu>
     </Menubar>
   );
 };
