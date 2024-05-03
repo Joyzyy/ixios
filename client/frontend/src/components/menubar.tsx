@@ -10,8 +10,13 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { useAtom } from "jotai";
+import { actionMenuAtom, currentActionAtom } from "@/features/atoms";
 
 export const MainMenu = () => {
+  const [, setActionMenuAtom] = useAtom(actionMenuAtom);
+  const [, setCurrentActionAtom] = useAtom(currentActionAtom);
+
   return (
     <Menubar className="rounded-none border-b border-none px-2 lg:px-4">
       <MenubarMenu>
@@ -83,7 +88,24 @@ export const MainMenu = () => {
       </MenubarMenu>
       <MenubarMenu>
         <MenubarTrigger>Action</MenubarTrigger>
-        <MenubarContent></MenubarContent>
+        <MenubarContent>
+          <MenubarItem
+            onClick={() => {
+              setActionMenuAtom(true);
+              setCurrentActionAtom("Simple statistics");
+            }}
+          >
+            Simple statistics
+          </MenubarItem>
+          <MenubarItem
+            onClick={() => {
+              setActionMenuAtom(true);
+              setCurrentActionAtom("Econometrics");
+            }}
+          >
+            Advanced statistics - Econometrics
+          </MenubarItem>
+        </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
         <MenubarTrigger>Equation</MenubarTrigger>

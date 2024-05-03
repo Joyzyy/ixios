@@ -1,21 +1,18 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMemo, useRef, useState, MutableRefObject } from "react";
+import { useMemo, useRef, useState, MutableRefObject, useEffect } from "react";
 import { STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-
-type DataInputType_2 = {
-  row: string;
-  values: MutableRefObject<any>[]; // refs
-};
+import { DataInputType } from "@/features/models";
+import { dataInputAtom } from "@/features/atoms";
+import { useAtom } from "jotai";
 
 let removedVariables: string[] = [];
 const numberPredetermined: number = 2;
@@ -30,9 +27,13 @@ export const DataInput = () => {
   );
   const [columns, setColumns] = useState<number>(numberPredetermined);
   const [noColumns, setNoColumns] = useState<number>(numberPredetermined * 5);
-  const [data, setData] = useState<DataInputType_2[]>([]);
+  const [dataInput, setDataInput] = useAtom(dataInputAtom);
   const cellRefs = useRef<any>({});
-  const memoizedData = useMemo(() => data, [data]);
+  const memoizedDataInput = useMemo(() => dataInput, [dataInput]);
+
+  useEffect(() => {
+    console.log(dataInput);
+  }, [dataInput]);
 
   const addRow = () => {
     let variable = removedVariables.length
@@ -55,32 +56,33 @@ export const DataInput = () => {
     setRows([...rows]);
     setColumns(columns - 1);
 
-    const newData = memoizedData.filter((row) => row.row !== variable);
-    setData(newData);
+    const newData = memoizedDataInput.filter((row) => row.row !== variable);
+    setDataInput(newData);
   };
 
   const removeColumn = () => {
     if (noColumns === 1) return;
     setNoColumns(noColumns - 1);
-    const newData = memoizedData.map((row) => {
+    const newData = memoizedDataInput.map((row) => {
       return {
         ...row,
         values: row.values.slice(0, -1),
       };
     });
-    setData(newData);
+    setDataInput(newData);
   };
 
   const handleInputData = (column: number, i: number) => {
-    const existingRowIndex = memoizedData.findIndex(
+    const existingRowIndex = memoizedDataInput.findIndex(
       (row) => row.row === rows[column]
     );
     const existingRow =
-      existingRowIndex !== -1 ? memoizedData[existingRowIndex] : undefined;
-    let newData = [] as DataInputType_2[];
+      existingRowIndex !== -1 ? memoizedDataInput[existingRowIndex] : undefined;
+    let newData = [] as DataInputType[];
     let currentRef = cellRefs.current[`${rows[column]}-${i}`];
+
     if (existingRow) {
-      newData = memoizedData.map((row) => {
+      newData = memoizedDataInput.map((row) => {
         if (row.row === rows[column]) {
           if (row.values.find((c) => c === currentRef)) return row;
           return {
@@ -92,7 +94,7 @@ export const DataInput = () => {
       });
     } else {
       newData = [
-        ...memoizedData,
+        ...memoizedDataInput,
         {
           row: rows[column],
           values: [currentRef],
@@ -100,29 +102,28 @@ export const DataInput = () => {
       ];
     }
 
-    setData(newData);
+    setDataInput(newData);
   };
 
   const getData = async () => {
-    let pbRequestData = {
-      data: data.map((item) => {
-        return {
-          row: item.row,
-          values: item.values.map((ref: any) => Number(ref.value)),
-        };
-      }),
-    };
-
-    await fetch("http://127.0.0.1:8080/v1/data_input", {
-      method: "POST",
-      body: JSON.stringify(pbRequestData),
-    })
-      .then((res) => res.json())
-      .catch((err) => console.error(err))
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => console.error(err));
+    // let pbRequestData = {
+    //   data: data.map((item) => {
+    //     return {
+    //       row: item.row,
+    //       values: item.values.map((ref: any) => Number(ref.value)),
+    //     };
+    //   }),
+    // };
+    // await fetch("http://127.0.0.1:8080/v1/data_input", {
+    //   method: "POST",
+    //   body: JSON.stringify(pbRequestData),
+    // })
+    //   .then((res) => res.json())
+    //   .catch((err) => console.error(err))
+    //   .then((res) => {
+    //     console.log(res);
+    //   })
+    //   .catch((err) => console.error(err));
   };
 
   return (

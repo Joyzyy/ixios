@@ -10,7 +10,7 @@ func InitGrpcClient() (*grpc.ClientConn, error) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	conn, err := grpc.NewClient("localhost:50051", opts...)
+	conn, err := grpc.NewClient("127.0.0.1:50051", opts...)
 	if err != nil {
 		return nil, err
 	}

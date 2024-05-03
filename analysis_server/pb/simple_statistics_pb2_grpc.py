@@ -2,10 +2,10 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import pb.basic_calculation_pb2 as basic__calculation__pb2
+import pb.simple_statistics_pb2 as simple__statistics__pb2
 
 
-class BasicCalculationStub(object):
+class SimpleStatisticsAnalysisStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,42 +14,42 @@ class BasicCalculationStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Add = channel.unary_unary(
-                '/basic_calculation.BasicCalculation/Add',
-                request_serializer=basic__calculation__pb2.BCRequest.SerializeToString,
-                response_deserializer=basic__calculation__pb2.BCResponse.FromString,
+        self.SimpleStatistics = channel.unary_unary(
+                '/simple_statistics.SimpleStatisticsAnalysis/SimpleStatistics',
+                request_serializer=simple__statistics__pb2.SimpleStatisticsRequest.SerializeToString,
+                response_deserializer=simple__statistics__pb2.SimpleStatisticsResponse.FromString,
                 )
 
 
-class BasicCalculationServicer(object):
+class SimpleStatisticsAnalysisServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Add(self, request, context):
+    def SimpleStatistics(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_BasicCalculationServicer_to_server(servicer, server):
+def add_SimpleStatisticsAnalysisServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Add': grpc.unary_unary_rpc_method_handler(
-                    servicer.Add,
-                    request_deserializer=basic__calculation__pb2.BCRequest.FromString,
-                    response_serializer=basic__calculation__pb2.BCResponse.SerializeToString,
+            'SimpleStatistics': grpc.unary_unary_rpc_method_handler(
+                    servicer.SimpleStatistics,
+                    request_deserializer=simple__statistics__pb2.SimpleStatisticsRequest.FromString,
+                    response_serializer=simple__statistics__pb2.SimpleStatisticsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'basic_calculation.BasicCalculation', rpc_method_handlers)
+            'simple_statistics.SimpleStatisticsAnalysis', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class BasicCalculation(object):
+class SimpleStatisticsAnalysis(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Add(request,
+    def SimpleStatistics(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +59,8 @@ class BasicCalculation(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/basic_calculation.BasicCalculation/Add',
-            basic__calculation__pb2.BCRequest.SerializeToString,
-            basic__calculation__pb2.BCResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/simple_statistics.SimpleStatisticsAnalysis/SimpleStatistics',
+            simple__statistics__pb2.SimpleStatisticsRequest.SerializeToString,
+            simple__statistics__pb2.SimpleStatisticsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
