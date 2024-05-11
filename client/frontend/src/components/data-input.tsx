@@ -5,8 +5,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMemo, useRef, useState } from "react";
-import { STATISTIC_VARIABLES } from "@/constants";
+import { useMemo, useRef } from "react";
+import { NUMBER_PREDETERMINED, STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -15,18 +15,15 @@ import { dataInputAtoms } from "@/features/atoms";
 import { useAtom } from "jotai";
 
 let removedVariables: string[] = [];
-const numberPredetermined: number = 2;
 const NEW_STATISTIC_VARIABLES = STATISTIC_VARIABLES.slice(
-  numberPredetermined,
+  NUMBER_PREDETERMINED,
   STATISTIC_VARIABLES.length
 );
 
 export const DataInput = () => {
-  const [rows, setRows] = useState<string[]>(
-    STATISTIC_VARIABLES.slice(0, numberPredetermined)
-  );
-  const [columns, setColumns] = useState<number>(numberPredetermined);
-  const [noColumns, setNoColumns] = useState<number>(numberPredetermined * 5);
+  const [rows, setRows] = useAtom(dataInputAtoms.rows);
+  const [columns, setColumns] = useAtom(dataInputAtoms.columns);
+  const [noColumns, setNoColumns] = useAtom(dataInputAtoms.noColumns);
   const [dataInput, setDataInput] = useAtom(dataInputAtoms.data);
   const cellRefs = useRef<any>({});
   const memoizedDataInput = useMemo(() => dataInput, [dataInput]);

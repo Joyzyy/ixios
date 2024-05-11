@@ -40,6 +40,9 @@ export const ImportExportDialog: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<string>("");
   const [submit, setSubmit] = useState<boolean>(false);
   const setDataInput = useSetAtom(dataInputAtoms.data);
+  const setRows = useSetAtom(dataInputAtoms.rows);
+  const setColumns = useSetAtom(dataInputAtoms.columns);
+  const setNoColumns = useSetAtom(dataInputAtoms.noColumns);
 
   useEffect(() => {
     const handle = async () => {
@@ -86,11 +89,18 @@ export const ImportExportDialog: React.FC = () => {
         const [start, end] = selectedRows.split(":");
         const startRow = parseInt(start.replace(/\D/g, ""));
         const endRow = parseInt(end.replace(/\D/g, ""));
+        // @TODO: fix when there are selected rows, to not replace them with 0
         setData(data.slice(startRow - 1, endRow));
       } else {
         setData(data);
       }
-      setSubmit(true);
+
+      if (sheet["!data"] && !selectedRows) {
+        setColumns(sheet["!data"]?.[0].length || 0);
+        setNoColumns(sheet["!data"]?.length - 1 || 0);
+        setRows(sheet["!data"]?.[0].map((d: any) => d.v) as any);
+        setSubmit(true);
+      }
     }
 
     if (submit) {
