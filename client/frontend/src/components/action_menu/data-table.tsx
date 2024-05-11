@@ -13,7 +13,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
@@ -26,7 +26,7 @@ export const DataTable = <TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) => {
   const [rowSelection, setRowSelection] = useState({});
-  const [, setSelectedDataForAnalysis] = useAtom(selectedDataForAnalysisAtom);
+  const setSelectedDataForAnalysis = useSetAtom(selectedDataForAnalysisAtom);
   const table = useReactTable({
     data,
     columns,

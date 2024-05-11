@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package statistics;
+
+option go_package = "./server/proto/";
+
+service StatisticsService {
+    rpc AnalyzeSimpleStatistics(StatisticsRequest) returns (StatisticsResponse);
+    rpc AnalyzeAdvancedStatistics(StatisticsRequest) returns (StatisticsResponse);
+}
+
+message StatisticsDataType {
+    string row = 1;
+    repeated float values = 2;
+}
+
+message StatisticsRequest {
+    repeated StatisticsDataType data = 1;
+    repeated string methods = 2;
+}
+
+message StatisticsResponse {
+    string steps = 1;
+    string result = 2;
+}

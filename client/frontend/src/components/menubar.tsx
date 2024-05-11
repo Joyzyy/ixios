@@ -10,12 +10,40 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { useAtom } from "jotai";
-import { actionMenuAtom, currentActionAtom } from "@/features/atoms";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  actionMenuAtom,
+  currentActionAtom,
+  importExportDialogAtom,
+} from "@/features/atoms";
+
+const MenubarSection = ({
+  title,
+  formats,
+  onMenuClick,
+}: {
+  title: string;
+  formats: string[];
+  onMenuClick: (format: string) => void;
+}) => {
+  return (
+    <MenubarSub>
+      <MenubarSubTrigger>{title}</MenubarSubTrigger>
+      <MenubarSubContent>
+        {formats.map((format) => (
+          <MenubarItem key={format} onClick={() => onMenuClick(format)}>
+            {format}
+          </MenubarItem>
+        ))}
+      </MenubarSubContent>
+    </MenubarSub>
+  );
+};
 
 export const MainMenu = () => {
-  const [, setActionMenuAtom] = useAtom(actionMenuAtom);
-  const [, setCurrentActionAtom] = useAtom(currentActionAtom);
+  const setActionMenuAtom = useSetAtom(actionMenuAtom);
+  const setImportExportDialogAtom = useSetAtom(importExportDialogAtom);
+  const setCurrentActionAtom = useSetAtom(currentActionAtom);
 
   return (
     <Menubar className="rounded-none border-b border-none px-2 lg:px-4">
@@ -64,26 +92,20 @@ export const MainMenu = () => {
             Clear file <MenubarShortcut>⌘W</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarSub>
-            <MenubarSubTrigger>Import</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>XLS</MenubarItem>
-              <MenubarItem>CSV</MenubarItem>
-              <MenubarItem>JSON</MenubarItem>
-              <MenubarItem>SQL</MenubarItem>
-              <MenubarItem>XML</MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarSub>
-            <MenubarSubTrigger>Export</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>XLS</MenubarItem>
-              <MenubarItem>CSV</MenubarItem>
-              <MenubarItem>JSON</MenubarItem>
-              <MenubarItem>SQL</MenubarItem>
-              <MenubarItem>XML</MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
+          <MenubarSection
+            title="Import"
+            formats={["XLS", "CSV", "JSON"]}
+            onMenuClick={(format) => {
+              setImportExportDialogAtom({ type: "Import", format: format });
+            }}
+          />
+          <MenubarSection
+            title="Export"
+            formats={["XLS", "CSV", "JSON"]}
+            onMenuClick={(format) => {
+              setImportExportDialogAtom({ type: "Export", format: format });
+            }}
+          />
         </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>

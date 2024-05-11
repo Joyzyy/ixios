@@ -1,6 +1,5 @@
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
@@ -11,11 +10,11 @@ import {
 import {
   actionMenuAtom,
   currentActionAtom,
-  dataInputAtom,
+  dataInputAtoms,
   selectedDataForAnalysisAtom,
 } from "@/features/atoms";
 import { DataInputType } from "@/features/models";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { DataTable } from "./action_menu/data-table";
 import { columns } from "./action_menu/columns";
@@ -29,9 +28,9 @@ import { StepsComponent } from "./action_menu/steps";
 export const ActionMenu = () => {
   const { toast } = useToast();
   const [actionMenu, setActionMenu] = useAtom(actionMenuAtom);
-  const [dataInput] = useAtom(dataInputAtom);
-  const [currentAction] = useAtom(currentActionAtom);
-  const [selectedDataForAnalysis] = useAtom(selectedDataForAnalysisAtom);
+  const dataInput = useAtomValue(dataInputAtoms.data);
+  const currentAction = useAtomValue(currentActionAtom);
+  const selectedDataForAnalysis = useAtomValue(selectedDataForAnalysisAtom);
   const [readableData, setReadableData] = useState<any>([]);
   const [selectedMethods, setSelectedMethods] = useState<Option[]>([]);
   const [results, setResults] = useState<{
@@ -73,10 +72,9 @@ export const ActionMenu = () => {
       return;
     }
 
-    let selectedData = selectedDataForAnalysis[0];
+    let selectedData = selectedDataForAnalysis;
     let methods = selectedMethods.map((method) => method.value);
 
-    console.time("now");
     fetch(`${API_URL_V1}/simple_statistics`, {
       method: "POST",
       body: JSON.stringify({
@@ -91,7 +89,6 @@ export const ActionMenu = () => {
           result: data.result,
         });
       });
-    console.timeEnd("now");
   };
 
   return (

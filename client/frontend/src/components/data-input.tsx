@@ -5,13 +5,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMemo, useRef, useState, MutableRefObject, useEffect } from "react";
+import { useMemo, useRef, useState } from "react";
 import { STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { DataInputType } from "@/features/models";
-import { dataInputAtom } from "@/features/atoms";
+import { dataInputAtoms } from "@/features/atoms";
 import { useAtom } from "jotai";
 
 let removedVariables: string[] = [];
@@ -27,13 +27,9 @@ export const DataInput = () => {
   );
   const [columns, setColumns] = useState<number>(numberPredetermined);
   const [noColumns, setNoColumns] = useState<number>(numberPredetermined * 5);
-  const [dataInput, setDataInput] = useAtom(dataInputAtom);
+  const [dataInput, setDataInput] = useAtom(dataInputAtoms.data);
   const cellRefs = useRef<any>({});
   const memoizedDataInput = useMemo(() => dataInput, [dataInput]);
-
-  useEffect(() => {
-    console.log(dataInput);
-  }, [dataInput]);
 
   const addRow = () => {
     let variable = removedVariables.length
@@ -103,27 +99,6 @@ export const DataInput = () => {
     }
 
     setDataInput(newData);
-  };
-
-  const getData = async () => {
-    // let pbRequestData = {
-    //   data: data.map((item) => {
-    //     return {
-    //       row: item.row,
-    //       values: item.values.map((ref: any) => Number(ref.value)),
-    //     };
-    //   }),
-    // };
-    // await fetch("http://127.0.0.1:8080/v1/data_input", {
-    //   method: "POST",
-    //   body: JSON.stringify(pbRequestData),
-    // })
-    //   .then((res) => res.json())
-    //   .catch((err) => console.error(err))
-    //   .then((res) => {
-    //     console.log(res);
-    //   })
-    //   .catch((err) => console.error(err));
   };
 
   return (

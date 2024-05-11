@@ -1,15 +1,13 @@
-# import pb.basic_calculation_pb2_grpc as bc
-# import pb.basic_calculation_pb2 as bc_pb
 import grpc
 from concurrent import futures
-import pb.simple_statistics_pb2_grpc as ss_grpc
-import pb.simple_statistics_pb2 as ss_proto
+import pb.statistics_pb2_grpc as ss_grpc
+import pb.statistics_pb2 as ss_proto
 import numpy as np
 
 def calculate_mean(data: list[float]):
     steps = [
         "Step 1: Sum all the elements in the dataset.",
-        f"Step 2: Divide the total sum by the number of elements. Formula: Mean = Σx / n"
+        "Step 2: Divide the total sum by the number of elements. Formula: \\text{mean} = \\frac{\\Sigma x}{n}"
     ]
     if data:
         mean = sum(data) / len(data)
@@ -26,7 +24,7 @@ def calculate_median(data: list[float]):
     steps.append(f"Step 2: Identify the middle element(s). Sorted data: {sorted_data}")
     if n % 2 == 0:
         median = (sorted_data[n // 2 - 1] + sorted_data[n // 2]) / 2
-        steps.append(f"Step 3: Calculate the average of the two middle numbers. Formula: Median = (x[n/2 - 1] + x[n/2]) / 2")
+        steps.append("Step 3: Calculate the average of the two middle numbers. Formula: $\\text{Median} = \frac{x[n/2 - 1] + x[n/2]}{2}$")
     else:
         median = sorted_data[n // 2]
         steps.append("Step 3: Median is the middle number in the sorted list.")
@@ -49,7 +47,7 @@ def calculate_mode(data: list[float]):
 def calculate_std(data: list[float]):
     steps, variance = calculate_variance(data)
     std = variance ** 0.5
-    steps.append("Step 4: Calculate the square root of the variance to get the standard deviation. Formula: Std Dev = √Variance")
+    steps.append(r"Step 4: Calculate the square root of the variance to get the standard deviation. Formula: $\text{Std Dev} = \sqrt{\text{Variance}}$")
     steps.append(f"Calculated standard deviation: {std}")
     return steps, std
 
@@ -60,7 +58,7 @@ def calculate_variance(data: list[float]):
     ]
     mean = sum(data) / len(data) if data else 0
     variance = sum((d - mean) ** 2 for d in data) / len(data) if data else 0
-    steps.append(f"Step 3: Divide the total by the number of elements. Formula: Variance = Σ(x - mean)² / n")
+    steps.append(r"Step 3: Divide the total by the number of elements. Formula: $\text{Variance} = \frac{\Sigma(x - \text{mean})^2}{n}$")
     steps.append(f"Calculated variance: {variance}")
     return steps, variance
 
@@ -106,13 +104,13 @@ def calculate_correlation(data: list[float]):
     squared_data_minus_mean = data_minus_mean ** 2
     steps.append(f"Step 3: Square the result. (Data - Mean)²: {squared_data_minus_mean}")
     variance = np.sum(squared_data_minus_mean) / len(data)
-    steps.append(f"Step 4: Calculate the variance. Variance: {variance}")
     std = np.sqrt(variance)
-    steps.append(f"Step 5: Calculate the standard deviation. Std Dev: {std}")
     data_normalized = data_minus_mean / std
-    steps.append(f"Step 6: Divide the result by the standard deviation. Data Normalized: {data_normalized}")
     correlation = np.dot(data_normalized, data_normalized) / len(data)
-    steps.append(f"Step 7: Calculate the correlation. Correlation: {correlation}")
+    steps.append("Step 4: Calculate the variance. Formula: \\frac{\Sigma (x - \\text{mean})^2}{n}")
+    steps.append("Step 5: Calculate the standard deviation. Formula: \\sqrt{\\text{Variance}}")
+    steps.append("Step 6: Divide the result by the standard deviation. Formula: \\frac{x - \\text{mean}}{\\text{Std Dev}}")
+    steps.append("Step 7: Calculate the correlation. Formula: \\frac{\\Sigma (x - \\text{mean}) * (y - \\text{mean})}{\\sqrt{\\Sigma (x - \\text{mean})^2 * \\Sigma (y - \\text{mean})^2}}")
     return steps, correlation
 
 SIMPLE_STATISTICS_METHODS = {
@@ -129,22 +127,26 @@ SIMPLE_STATISTICS_METHODS = {
     "corr": calculate_correlation
 }
 
-class SimpleStatisticsServicer(ss_grpc.SimpleStatisticsAnalysisServicer):
-    def SimpleStatistics(self, request, context):
-        data: ss_proto.SimpleStatisticsDataType = request.data
+class StatisticsServicer(ss_grpc.StatisticsServiceServicer):
+    def AnalyzeSimpleStatistics(self, request, context):
+        data: ss_proto.StatisticsDataType = request.data
         methods: list[str] = request.methods
-        result = {}
-        steps = {}
+        result, steps = {}, {}
+        print(f'data: {data[0].values}')
+        print(f'methods: {methods}')
         for method in methods:
             if method in SIMPLE_STATISTICS_METHODS:
-                s, r = SIMPLE_STATISTICS_METHODS[method](list(data.values))
+                s, r = SIMPLE_STATISTICS_METHODS[method](list(data[0].values))
                 steps[method] = s
                 result[method] = r
-        return ss_proto.SimpleStatisticsResponse(steps=str(steps), result=str(result))
+        return ss_proto.StatisticsResponse(steps=str(steps), result=str(result))
+    
+    def AnalyzeAdvancedStatistics(self, request, context):
+        return super().AnalyzeAdvancedStatistics(request, context)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    ss_grpc.add_SimpleStatisticsAnalysisServicer_to_server(SimpleStatisticsServicer(), server)
+    ss_grpc.add_StatisticsServiceServicer_to_server(StatisticsServicer(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     server.wait_for_termination()

@@ -9,47 +9,44 @@ import (
 	"net/http"
 )
 
-func convertSimpleModelToProto(dataInput models.SimpleStatisticsInputType) *proto.SimpleStatisticsDataType {
-	return &proto.SimpleStatisticsDataType{
+func convertModelToProto(dataInput models.StatisticalInputType) *proto.StatisticsDataType {
+	return &proto.StatisticsDataType{
 		Row:    dataInput.Row,
 		Values: dataInput.Values,
 	}
 }
 
-func ConverToProto(statisticalInput interface{}) interface{} {
-	switch statisticalInput := statisticalInput.(type) {
-	case models.SimpleStatisticsInput:
-		data := convertSimpleModelToProto(statisticalInput.Data)
-		simpleStatisticsRequest := &proto.SimpleStatisticsRequest{
-			Data:    data,
-			Methods: statisticalInput.Methods,
-		}
-		return simpleStatisticsRequest
+func convertToProto(statisticalInput models.StatisticalInput) interface{} {
+	var data []*proto.StatisticsDataType
+
+	for _, item := range statisticalInput.Data {
+		data = append(data, convertModelToProto(item))
 	}
-	return nil
+
+	return &proto.StatisticsRequest{
+		Data:    data,
+		Methods: statisticalInput.Methods,
+	}
 }
 
-func ConverModelToProtoMiddleware[T models.SimpleStatisticsInput | float32](
-	f *http.HandlerFunc,
-) http.HandlerFunc {
+func ConvertModelToProtoMiddleware(f *http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// This function will contain the logic to convert the model to proto
-		var StatisticalInput T
+		var statisticalInput models.StatisticalInput
 
 		if r.Body == nil {
 			http.Error(w, "empty request body", http.StatusBadRequest)
 			return
 		}
 
-		if err := json.NewDecoder(r.Body).Decode(&StatisticalInput); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&statisticalInput); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		convertedData := ConverToProto(StatisticalInput)
-		fmt.Println("converted data: ", convertedData)
+		fmt.Println("statisticalInput http: ", statisticalInput)
 
-		ctx := context.WithValue(r.Context(), "StatisticalInput", convertedData)
+		convertedData := convertToProto(statisticalInput)
+		ctx := context.WithValue(r.Context(), "statisticalInput", convertedData)
 
 		r = r.WithContext(ctx)
 		f.ServeHTTP(w, r)

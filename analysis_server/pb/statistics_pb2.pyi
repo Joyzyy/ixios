@@ -5,7 +5,7 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class SimpleStatisticsDataType(_message.Message):
+class StatisticsDataType(_message.Message):
     __slots__ = ("row", "values")
     ROW_FIELD_NUMBER: _ClassVar[int]
     VALUES_FIELD_NUMBER: _ClassVar[int]
@@ -13,15 +13,15 @@ class SimpleStatisticsDataType(_message.Message):
     values: _containers.RepeatedScalarFieldContainer[float]
     def __init__(self, row: _Optional[str] = ..., values: _Optional[_Iterable[float]] = ...) -> None: ...
 
-class SimpleStatisticsRequest(_message.Message):
+class StatisticsRequest(_message.Message):
     __slots__ = ("data", "methods")
     DATA_FIELD_NUMBER: _ClassVar[int]
     METHODS_FIELD_NUMBER: _ClassVar[int]
-    data: SimpleStatisticsDataType
+    data: _containers.RepeatedCompositeFieldContainer[StatisticsDataType]
     methods: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, data: _Optional[_Union[SimpleStatisticsDataType, _Mapping]] = ..., methods: _Optional[_Iterable[str]] = ...) -> None: ...
+    def __init__(self, data: _Optional[_Iterable[_Union[StatisticsDataType, _Mapping]]] = ..., methods: _Optional[_Iterable[str]] = ...) -> None: ...
 
-class SimpleStatisticsResponse(_message.Message):
+class StatisticsResponse(_message.Message):
     __slots__ = ("steps", "result")
     STEPS_FIELD_NUMBER: _ClassVar[int]
     RESULT_FIELD_NUMBER: _ClassVar[int]

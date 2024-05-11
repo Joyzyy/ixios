@@ -39,7 +39,7 @@ func main() {
 	log.Println("Initialized gRPC client")
 
 	// setup grpc contract clients
-	simpleStatisticsGRPC := proto.NewSimpleStatisticsAnalysisClient(gRPC)
+	statisticsGRPC := proto.NewStatisticsServiceClient(gRPC)
 
 	// setup http server
 	router, server := rest.InitHttpServer(8080)
@@ -47,8 +47,7 @@ func main() {
 	log.Println("Initialized HTTP server")
 
 	// setup routes
-	routes.DataInputRoutes(router, gRPC)
-	routes.SimpleStatisticsRoutes(router, &simpleStatisticsGRPC)
+	routes.StatisticsRoutes(router, &statisticsGRPC)
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("encountered error while initializing http server: %v", err)
