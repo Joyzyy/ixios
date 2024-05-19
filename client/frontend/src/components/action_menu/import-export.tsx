@@ -47,6 +47,7 @@ export const ImportExportDialog: React.FC = () => {
   useEffect(() => {
     const handle = async () => {
       if (file) {
+        setDataInput([]);
         const data = await file.arrayBuffer();
         const workbook = xlsx.read(data, { dense: true });
         setWorkbook(workbook);

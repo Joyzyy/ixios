@@ -113,7 +113,7 @@ export const MainMenu = () => {
         <MenubarContent>
           <MenubarItem
             onClick={() => {
-              setActionMenuAtom(true);
+              setActionMenuAtom("selector_stats");
               setCurrentActionAtom("Simple statistics");
             }}
           >
@@ -121,8 +121,8 @@ export const MainMenu = () => {
           </MenubarItem>
           <MenubarItem
             onClick={() => {
-              setActionMenuAtom(true);
-              setCurrentActionAtom("Econometrics");
+              setActionMenuAtom("selector_stats");
+              setCurrentActionAtom("Advanced statistics - Econometrics");
             }}
           >
             Advanced statistics - Econometrics
