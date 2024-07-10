@@ -4,6 +4,7 @@ import pb.statistics_pb2 as ss_proto
 from concurrent import futures
 from stats import descriptive, inferential
 from google.protobuf.struct_pb2 import Struct
+from grpc_reflection.v1alpha import reflection
 
 def process_method(method, data):
     if method in inferential.AVAILABLE_METHODS:
@@ -54,6 +55,11 @@ def serve():
     try:
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         ss_grpc.add_StatisticsServiceServicer_to_server(StatisticsServicer(), server)
+        SERVICE_NAMES = (
+            ss_grpc.DESCRIPTOR.services_by_name['StatisticsService'].full_name,
+            reflection.SERVICE_NAME,
+        )
+        reflection.enable_server_reflection(SERVICE_NAMES, server)
         server.add_insecure_port('[::]:50051')
         server.start()
         server.wait_for_termination()
