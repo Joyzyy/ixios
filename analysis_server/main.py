@@ -14,6 +14,7 @@ def process_method(method, data):
 
 class StatisticsServicer(ss_grpc.StatisticsServiceServicer):
     def AnalyzeDescriptiveStatistics(self, request, context):
+        print(f"Got request: {request}")
         data: ss_proto.StatisticsDataType = request.data
         methods: list[str] = request.methods
         result, steps = {}, {}
@@ -33,6 +34,7 @@ class StatisticsServicer(ss_grpc.StatisticsServiceServicer):
         return ss_proto.StatisticsDescriptiveResponse(result=str(steps))
     
     def AnalyzeInferentialStatistics(self, request, context):
+        print(f"Got request: {request}")
         data: ss_proto.StatisticsDataType = request.data
         methods: list[str] = request.methods
         result = Struct()
@@ -56,7 +58,7 @@ def serve():
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         ss_grpc.add_StatisticsServiceServicer_to_server(StatisticsServicer(), server)
         SERVICE_NAMES = (
-            ss_grpc.DESCRIPTOR.services_by_name['StatisticsService'].full_name,
+            ss_proto.DESCRIPTOR.services_by_name['StatisticsService'].full_name,
             reflection.SERVICE_NAME,
         )
         reflection.enable_server_reflection(SERVICE_NAMES, server)
