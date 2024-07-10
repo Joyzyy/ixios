@@ -10,7 +10,7 @@ func InitGrpcClient() (*grpc.ClientConn, error) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	conn, err := grpc.Dial("0.0.0.0:50051", opts...)
+	conn, err := grpc.Dial("joylunow.dev:50051", opts...)
 	if err != nil {
 		return nil, err
 	}
