@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'client/**'
+      - "client/**"
 
 jobs:
   build_and_push_fe:
@@ -14,9 +14,9 @@ jobs:
       - name: Deploy Static Assets
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: $${{ secrets.VPS_IP }}
-          username: $${{ secrets.VPS_USER }}
-          key: $${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd ixios/
             git fetch
