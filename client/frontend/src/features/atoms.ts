@@ -28,3 +28,8 @@ export const userAtom = atomWithStorage<{
   token?: string;
   username?: string;
 } | null>("user", null);
+export const equationsAtom = atom<{
+  row: string;
+  transformation: string;
+  formattedEquation: string;
+}[][]>([]);

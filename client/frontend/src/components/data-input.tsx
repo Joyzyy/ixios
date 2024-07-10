@@ -5,13 +5,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { NUMBER_PREDETERMINED, STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataInputType } from "@/features/models";
 import { dataInputAtoms } from "@/features/atoms";
 import { useAtom } from "jotai";
+import { useToast } from "./ui/use-toast";
 
 let removedVariables: string[] = [];
 const NEW_STATISTIC_VARIABLES = STATISTIC_VARIABLES.slice(
@@ -26,6 +27,7 @@ export const DataInput = () => {
   const [dataInput, setDataInput] = useAtom(dataInputAtoms.data);
   const cellRefs = useRef<any>({});
   const memoizedDataInput = useMemo(() => dataInput, [dataInput]);
+  const { toast } = useToast();
 
   const addRow = () => {
     let variable = removedVariables.length
@@ -64,7 +66,20 @@ export const DataInput = () => {
     setDataInput(newData);
   };
 
-  const handleInputData = (column: number, i: number) => {
+  const handleInputData = (
+    column: number,
+    i: number,
+    event: React.FormEvent<HTMLInputElement>
+  ) => {
+    const inputElement = event.currentTarget.value;
+    if (!/^-?\d*[,]?\d*$/.test(inputElement)) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter a valid number.",
+        variant: "destructive",
+      });
+      return;
+    }
     const existingRowIndex = memoizedDataInput.findIndex(
       (row) => row.row === rows[column]
     );
@@ -128,7 +143,7 @@ export const DataInput = () => {
                   ref={(el) =>
                     (cellRefs.current[`${rows[column]}-${idx}`] = el)
                   }
-                  onInput={() => handleInputData(column, idx)}
+                  onInput={(event) => handleInputData(column, idx, event)}
                 />
               </TableCell>
             ))}
@@ -156,92 +171,3 @@ export const DataInput = () => {
     </Table>
   );
 };
-
-/*
-  const tableContainerRef = useRef<any>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => 40,
-    getScrollElement: () => tableContainerRef.current,
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? (element) => element?.getBoundingClientRect().height
-        : undefined,
-    overscan: 5,
-  });
-
-  return (
-    <Table
-      ref={tableContainerRef}
-      style={{
-        overflow: "auto",
-        position: "relative",
-        height: "95.5vh",
-      }}
-    >
-      <TableHeader>
-        <TableRow className="flex flex-row">
-          {rows.map((row) => (
-            <TableRow key={row}>
-              <Button variant={"link"} disabled className="w-24">
-                {row}
-              </Button>
-            </TableRow>
-          ))}
-          <Button variant={"link"} onClick={addRow} className="w-24">
-            +
-          </Button>
-          <Button variant={"link"} onClick={removeRow} className="w-24">
-            -
-          </Button>
-        </TableRow>
-      </TableHeader>
-      <TableBody
-        style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
-          position: "relative",
-        }}
-      >
-        {Array.from(Array(noColumns).keys()).map((_column, idx) => (
-          <TableRow key={_column} className="flex flex-row">
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <TableCell key={row}>
-                  <Input
-                    type="number"
-                    className="w-20 text-center"
-                    id={`cell-${row}-${idx}`}
-                    ref={(el) => (cellRefs.current[`${row}-${idx}`] = el)}
-                    onInput={() => handleInputData(virtualRow.index, idx)}
-                  />
-                </TableCell>
-              );
-            })}
-          </TableRow>
-        ))}
-        <TableRow>
-          <TableCell>
-            <Button
-              variant={"link"}
-              onClick={() => setNoColumns(noColumns + 1)}
-              className="w-12 text-center"
-            >
-              +
-            </Button>
-            <Button
-              variant={"link"}
-              onClick={removeColumn}
-              className="w-12 text-center"
-            >
-              -
-            </Button>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  );
-
-*/

@@ -12,6 +12,7 @@ import {
   selectedDataForAnalysisAtom,
   resultsAtom,
   currentActionAtom,
+  equationsAtom,
 } from "@/features/atoms";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { DataTable } from "./action_menu/data-table";
@@ -35,16 +36,27 @@ const SelectorStats: React.FC = () => {
   const { toast } = useToast();
   const [readableData, setReadableData] = useState<any[]>([]);
   const [selectedMethods, setSelectedMethods] = useState<Option[]>([]);
+  const [selectedEquations, setSelectedEquations] = useState<Option[]>([]);
   const setResults = useSetAtom(resultsAtom);
   const dataInput = useAtomValue(dataInputAtoms.data);
   const currentAction = useAtomValue(currentActionAtom);
   const selectedDataForAnalysis = useAtomValue(selectedDataForAnalysisAtom);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const equations = useAtomValue(equationsAtom);
+  const [formattedEquations, setFormattedEquations] = useState<Option[]>([]);
 
   useEffect(() => {
     if (actionMenu === "selector_stats") {
       makeReadable(dataInput);
+      if (equations.length > 0) formatEquation(equations);
       setSelectedMethods([]);
     }
+
+    return () => {
+      setReadableData([]);
+      setSelectedMethods([]);
+      setSelectedEquations([]);
+    };
   }, [actionMenu]);
 
   const makeReadable = (data: DataInputType[]) => {
@@ -55,6 +67,17 @@ const SelectorStats: React.FC = () => {
       };
     });
     setReadableData(pbRequestData);
+  };
+
+  const formatEquation = (equation: typeof equations) => {
+    let format = equation.map((item) => {
+      let label = item
+        .map((itm) => itm.transformation + "(" + itm.row + ")")
+        .join(" ");
+      let value = JSON.stringify(item);
+      return { label, value };
+    });
+    setFormattedEquations(format);
   };
 
   const runAnalysis = () => {
@@ -72,19 +95,48 @@ const SelectorStats: React.FC = () => {
       return;
     }
 
+    if (currentAction === identifiers.INFERENTIAL_STATISTICS) {
+      if (selectedDataForAnalysis.length < 2) {
+        toast({
+          title: "Less data selected",
+          description: "Please select at least two data to run analysis.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (
+        readableData.map((item) => item.values.length).some((item) => item < 2)
+      ) {
+        toast({
+          title: "Less data selected",
+          description:
+            "Please select a dataset with more than 1 value per variable.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    let rows = selectedDataForAnalysis.map((item) => item.row);
     if (
-      currentAction === identifiers.INFERENTIAL_STATISTICS &&
-      selectedDataForAnalysis.length < 2
+      selectedEquations.length > 0 &&
+      selectedEquations.some((eq) => {
+        let equation = JSON.parse(eq.value);
+        return equation.some((eq: any) => !rows.includes(eq.row));
+      })
     ) {
       toast({
-        title: "Less data selected",
-        description: "Please select at least two data to run analysis.",
+        title: "Equation row mismatch",
+        description:
+          "Please select equations with rows that are in the selected data.",
+        variant: "destructive",
       });
       return;
     }
 
     let methods = selectedMethods.map((method) => method.value);
-
+    setIsLoading(true);
     fetch(
       `${API_URL_V1}/statistics/${currentAction === identifiers.DESCRIPTIVE_STATISTICS ? "descriptive" : "inferential"}`,
       {
@@ -114,6 +166,9 @@ const SelectorStats: React.FC = () => {
           title: "Failed to fetch data",
           description: "Please try again later.",
         });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -167,8 +222,36 @@ const SelectorStats: React.FC = () => {
               </div>
             </div>
           </>
+          {currentAction === identifiers.INFERENTIAL_STATISTICS &&
+            formattedEquations.length > 0 && (
+              <>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Equations</h2>
+                  <div className="space-y-4">
+                    <div>
+                      <MultipleSelector
+                        defaultOptions={formattedEquations}
+                        onChange={setSelectedEquations}
+                        value={selectedEquations}
+                        placeholder="Select equations"
+                        hidePlaceholderWhenSelected
+                        emptyIndicator={
+                          <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                            no results found.
+                          </p>
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           <div className="flex justify-center items-center">
-            <Button onClick={runAnalysis}>Run analysis</Button>
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            ) : (
+              <Button onClick={runAnalysis}>Run analysis</Button>
+            )}
           </div>
         </div>
       </DialogContent>
