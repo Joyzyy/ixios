@@ -1,5 +1,4 @@
 import type { Option } from "@/components/ui/multiple-selector";
-import OpenAI from "openai";
 
 const STATISTIC_VARIABLES = "ABCDEFGHIJKLMNOPQRSTUVWZXY".split("").reverse();
 
