@@ -23,8 +23,7 @@ const ExtraOptionsAfterAction = () => {
         <Button variant={"ghost"}>More...</Button>
       </DrawerTrigger>
       <DrawerContent className="h-[90vh]">
-        <button>General</button>
-        <button>Advanced</button>
+        <button>@TODO</button>
       </DrawerContent>
     </Drawer>
   );
