@@ -17,10 +17,8 @@ const container = document.getElementById("root")!;
 if (!container.innerHTML) {
   const root = createRoot(container);
   root.render(
-    <React.StrictMode>
-      <ThemeProvider defaultTheme={"dark"} storageKey="vite-ui-theme">
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </React.StrictMode>
+    <ThemeProvider defaultTheme={"system"} storageKey="vite-ui-theme">
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 }

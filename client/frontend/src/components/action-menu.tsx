@@ -16,7 +16,27 @@ import { useAtom, useAtomValue } from "jotai";
 import { StepsComponent } from "./action_menu/steps";
 import { Button } from "./ui/button";
 
-export const ActionMenu = () => {
+const ExtraOptionsAfterAction = () => {
+  return (
+    <Drawer>
+      <DrawerTrigger>
+        <Button variant={"ghost"}>More...</Button>
+      </DrawerTrigger>
+      <DrawerContent className="h-[90vh]">
+        <button>General</button>
+        <button>Advanced</button>
+      </DrawerContent>
+    </Drawer>
+  );
+};
+
+export const ActionMenuWrapper = () => {
+  const actionMenu = useAtomValue(actionMenuAtom);
+  if (actionMenu !== "statistics_summary") return null;
+  return <ActionMenu />;
+};
+
+const ActionMenu = () => {
   const [actionMenu, setActionMenu] = useAtom(actionMenuAtom);
   const currentAction = useAtomValue(currentActionAtom);
   const results = useAtomValue(resultsAtom);
@@ -37,7 +57,10 @@ export const ActionMenu = () => {
               <div className="space-y-4">
                 <div className="text-sm">
                   {results.steps ? (
-                    <StepsComponent steps={results.steps} />
+                    <StepsComponent
+                      steps={results.steps}
+                      type={currentAction}
+                    />
                   ) : (
                     "There was an error while fetching the data. Please try again."
                   )}
@@ -47,17 +70,7 @@ export const ActionMenu = () => {
           </DrawerDescription>
         </DrawerHeader>
         <DrawerFooter>
-          <Drawer>
-            <DrawerTrigger>
-              <Button variant={"ghost"} className="w-full">
-                Graphs
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="h-[90vh]">
-              <button>General</button>
-              <button>Advanced</button>
-            </DrawerContent>
-          </Drawer>
+          <ExtraOptionsAfterAction />
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

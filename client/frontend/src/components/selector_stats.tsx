@@ -10,30 +10,40 @@ import {
   actionMenuAtom,
   dataInputAtoms,
   selectedDataForAnalysisAtom,
-  methodsAtom,
   resultsAtom,
+  currentActionAtom,
 } from "@/features/atoms";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { DataTable } from "./action_menu/data-table";
 import { columns } from "./action_menu/columns";
 import type { DataInputType } from "@/features/models";
 import MultipleSelector, { Option } from "./ui/multiple-selector";
-import { API_URL_V1, SIMPLE_STATISTICS_OPTIONS } from "@/constants";
+import { API_URL_V1, identifiers, options } from "@/constants";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
-export const SelectorStats: React.FC = () => {
+export const SelectorStatsWrapper = () => {
+  const actionMenu = useAtomValue(actionMenuAtom);
+
+  if (actionMenu !== "selector_stats") return null;
+  return <SelectorStats />;
+};
+
+const SelectorStats: React.FC = () => {
+  const [actionMenu, setActionMenu] = useAtom(actionMenuAtom);
   const { toast } = useToast();
   const [readableData, setReadableData] = useState<any[]>([]);
   const [selectedMethods, setSelectedMethods] = useState<Option[]>([]);
-  const [actionMenu, setActionMenu] = useAtom(actionMenuAtom);
   const setResults = useSetAtom(resultsAtom);
   const dataInput = useAtomValue(dataInputAtoms.data);
+  const currentAction = useAtomValue(currentActionAtom);
   const selectedDataForAnalysis = useAtomValue(selectedDataForAnalysisAtom);
 
   useEffect(() => {
     if (actionMenu === "selector_stats") {
       makeReadable(dataInput);
+      setSelectedMethods([]);
     }
   }, [actionMenu]);
 
@@ -62,30 +72,47 @@ export const SelectorStats: React.FC = () => {
       return;
     }
 
-    if (selectedDataForAnalysis.length > 1) {
+    if (
+      currentAction === identifiers.INFERENTIAL_STATISTICS &&
+      selectedDataForAnalysis.length < 2
+    ) {
       toast({
-        title: "Multiple data selected",
-        description: "Please select only one data to run analysis.",
+        title: "Less data selected",
+        description: "Please select at least two data to run analysis.",
       });
       return;
     }
 
     let methods = selectedMethods.map((method) => method.value);
 
-    setActionMenu("statistics_summary");
-
-    fetch(`${API_URL_V1}/simple_statistics`, {
-      method: "POST",
-      body: JSON.stringify({
-        data: selectedDataForAnalysis,
-        methods: methods,
-      }),
-    })
-      .then((res) => res.json())
+    fetch(
+      `${API_URL_V1}/statistics/${currentAction === identifiers.DESCRIPTIVE_STATISTICS ? "descriptive" : "inferential"}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          data: selectedDataForAnalysis,
+          methods: methods,
+        }),
+      }
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        setActionMenu("statistics_summary");
+        return res.json();
+      })
       .then((data) => {
+        console.log("data: ", data);
         setResults({
-          steps: data.steps,
-          result: data.result,
+          steps: data.result,
+        });
+      })
+      .catch((err) => {
+        console.error("err: ", err);
+        toast({
+          title: "Failed to fetch data",
+          description: "Please try again later.",
         });
       });
   };
@@ -106,17 +133,26 @@ export const SelectorStats: React.FC = () => {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col space-y-4">
-          <>
-            <div className="text-xl font-semibold">Variables</div>
+          <ScrollArea className="w-[28.5rem] whitespace-nowrap overflow-hidden">
+            <ScrollBar orientation="horizontal" />
+            <div className="text-xl font-semibold mb-2">Variables</div>
             <DataTable columns={columns} data={readableData} />
-          </>
+            <ScrollBar
+              orientation="vertical"
+              className="absolute right-0 top-0 h-full"
+            />
+          </ScrollArea>
           <>
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Methods</h2>
               <div className="space-y-4">
                 <div>
                   <MultipleSelector
-                    defaultOptions={SIMPLE_STATISTICS_OPTIONS}
+                    defaultOptions={
+                      currentAction === identifiers.DESCRIPTIVE_STATISTICS
+                        ? options.DESCRIPTIVE_STATISTICS
+                        : options.INFERENTIAL_STATISTICS
+                    }
                     onChange={setSelectedMethods}
                     value={selectedMethods}
                     placeholder="Select analysis methods"

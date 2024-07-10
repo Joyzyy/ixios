@@ -1,5 +1,5 @@
 import { dataInputAtoms, importExportDialogAtom } from "@/features/atoms";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -28,8 +28,15 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
-export const ImportExportDialog: React.FC = () => {
+export const ImportExportDialogWrapper = () => {
+  const importExportDialog = useAtomValue(importExportDialogAtom);
+  if (!importExportDialog) return null;
+  return <ImportExportDialog />;
+};
+
+const ImportExportDialog: React.FC = () => {
   const [importExportDialog, setImportExportDialog] = useAtom(
     importExportDialogAtom
   );
@@ -206,72 +213,80 @@ export const ImportExportDialog: React.FC = () => {
               )}
               {step === 1 && (
                 <>
-                  <div className="flex flex-col space-y-2">
-                    <Label>
-                      Select an Excel sheet and a range of rows to import into
-                      the application.
-                    </Label>
-                  </div>
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="sheet">Sheet</Label>
-                        <Select defaultValue="Sheet1">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sheet" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {workbook?.SheetNames.map((sheet) => (
-                              <SelectItem value={sheet} key={sheet}>
-                                {sheet}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="rows">
-                          Rows (
-                          {workbook?.Sheets[workbook?.SheetNames[0]]["!ref"]})
-                        </Label>
-                        <Input
-                          className="w-full"
-                          id="rows"
-                          placeholder="e.g. A4:B4"
-                          type="text"
-                          onInput={(e) => {
-                            if (submit) setSubmit(false);
-                            setSelectedRows(
-                              (e.target as HTMLInputElement).value
-                            );
-                          }}
-                        />
-                      </div>
+                  <div className="flex flex-col space-y-2 mb-2 w-full">
+                    <div className="flex flex-col space-y-2">
+                      <Label>
+                        Select an Excel sheet and a range of rows to import into
+                        the application.
+                      </Label>
                     </div>
-                    <Button onClick={previewSelectedData}>
-                      {submit ? "Submit" : "Preview"}
-                    </Button>
+                    <div className="grid gap-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="sheet">Sheet</Label>
+                          <Select defaultValue="Sheet1">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select sheet" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {workbook?.SheetNames.map((sheet) => (
+                                <SelectItem value={sheet} key={sheet}>
+                                  {sheet}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="rows">
+                            Rows (
+                            {workbook?.Sheets[workbook?.SheetNames[0]]["!ref"]})
+                          </Label>
+                          <Input
+                            className="w-full"
+                            id="rows"
+                            placeholder="e.g. A4:B4"
+                            type="text"
+                            onInput={(e) => {
+                              if (submit) setSubmit(false);
+                              setSelectedRows(
+                                (e.target as HTMLInputElement).value
+                              );
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <Button onClick={previewSelectedData}>
+                        {submit ? "Submit" : "Preview"}
+                      </Button>
+                    </div>
                   </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        {workbook?.Sheets[workbook?.SheetNames[0]][
-                          "!data"
-                        ]?.[0].map((d, i) => (
-                          <TableHead>{d && (d.v as string)}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.map((row) => (
+                  <ScrollArea className="w-[27rem] whitespace-nowrap h-[50vh] overflow-hidden">
+                    <ScrollBar orientation="horizontal" />
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          {Object.values(row).map((v: any) => (
-                            <TableCell>{v}</TableCell>
+                          {workbook?.Sheets[workbook?.SheetNames[0]][
+                            "!data"
+                          ]?.[0].map((d, i) => (
+                            <TableHead key={i}>
+                              {d && (d.v as string)}
+                            </TableHead>
                           ))}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {data.map((row, i) => (
+                          <TableRow key={i}>
+                            {Object.values(row).map((v: any, i) => (
+                              <TableCell key={`${v}*${i}`}>{v}</TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    <ScrollBar orientation="vertical" />
+                  </ScrollArea>
                 </>
               )}
             </div>

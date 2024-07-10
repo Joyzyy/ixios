@@ -1,12 +1,13 @@
 syntax = "proto3";
 
 package statistics;
+import "google/protobuf/struct.proto";
 
 option go_package = "./server/proto/";
 
 service StatisticsService {
-    rpc AnalyzeSimpleStatistics(StatisticsRequest) returns (StatisticsResponse);
-    rpc AnalyzeAdvancedStatistics(StatisticsRequest) returns (StatisticsResponse);
+    rpc AnalyzeDescriptiveStatistics(StatisticsRequest) returns (StatisticsDescriptiveResponse);
+    rpc AnalyzeInferentialStatistics(StatisticsRequest) returns (StatisticsInferentialResponse);
 }
 
 message StatisticsDataType {
@@ -19,7 +20,10 @@ message StatisticsRequest {
     repeated string methods = 2;
 }
 
-message StatisticsResponse {
-    string steps = 1;
-    string result = 2;
+message StatisticsDescriptiveResponse {
+    string result = 1;
+}
+
+message StatisticsInferentialResponse {
+    google.protobuf.Struct result = 1;
 }

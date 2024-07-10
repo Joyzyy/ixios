@@ -1,4 +1,5 @@
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { DataInputType } from "./models";
 import { STATISTIC_VARIABLES, NUMBER_PREDETERMINED } from "@/constants";
 import { Option } from "@/components/ui/multiple-selector";
@@ -12,8 +13,7 @@ export namespace dataInputAtoms {
 }
 export const methodsAtom = atom<Option[]>([]);
 export const resultsAtom = atom<{
-  steps?: any;
-  result?: any;
+  steps?: {} | string;
 }>({});
 export const currentActionAtom = atom<string>("");
 export const selectedDataForAnalysisAtom = atom<any[]>([]);
@@ -21,3 +21,10 @@ export const importExportDialogAtom = atom<{
   type: string;
   format: string;
 } | null>(null);
+export const userAccountDialogAtom = atom<{
+  type: string;
+} | null>(null);
+export const userAtom = atomWithStorage<{
+  token?: string;
+  username?: string;
+} | null>("user", null);

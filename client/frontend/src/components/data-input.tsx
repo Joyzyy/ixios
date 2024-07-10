@@ -8,7 +8,6 @@ import {
 import { useMemo, useRef } from "react";
 import { NUMBER_PREDETERMINED, STATISTIC_VARIABLES } from "@/constants";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { DataInputType } from "@/features/models";
 import { dataInputAtoms } from "@/features/atoms";
@@ -99,64 +98,150 @@ export const DataInput = () => {
   };
 
   return (
-    <ScrollArea>
-      <Table>
-        <TableHeader>
-          <TableRow className="flex flex-row">
-            {rows.map((row) => (
-              <TableRow key={row}>
-                <Button variant={"link"} disabled className="w-24">
-                  {row}
-                </Button>
-              </TableRow>
+    <Table>
+      <TableHeader>
+        <TableRow className="flex flex-row">
+          {rows.map((row) => (
+            <TableRow key={row}>
+              <Button variant={"link"} disabled className="w-24">
+                {row}
+              </Button>
+            </TableRow>
+          ))}
+          <Button variant={"link"} onClick={addRow} className="w-24">
+            +
+          </Button>
+          <Button variant={"link"} onClick={removeRow} className="w-24">
+            -
+          </Button>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Array.from(Array(noColumns).keys()).map((_column, idx) => (
+          <TableRow key={_column} className="flex flex-row">
+            {Array.from(Array(columns).keys()).map((column) => (
+              <TableCell key={column}>
+                <Input
+                  type="number"
+                  className="w-20 text-center"
+                  id={`cell-${rows[column]}-${idx}`}
+                  ref={(el) =>
+                    (cellRefs.current[`${rows[column]}-${idx}`] = el)
+                  }
+                  onInput={() => handleInputData(column, idx)}
+                />
+              </TableCell>
             ))}
-            <Button variant={"link"} onClick={addRow} className="w-24">
+          </TableRow>
+        ))}
+        <TableRow>
+          <TableCell>
+            <Button
+              variant={"link"}
+              onClick={() => setNoColumns(noColumns + 1)}
+              className="w-12 text-center"
+            >
               +
             </Button>
-            <Button variant={"link"} onClick={removeRow} className="w-24">
+            <Button
+              variant={"link"}
+              onClick={removeColumn}
+              className="w-12 text-center"
+            >
               -
             </Button>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from(Array(noColumns).keys()).map((_column, idx) => (
-            <TableRow key={_column} className="flex flex-row">
-              {Array.from(Array(columns).keys()).map((column) => (
-                <TableCell key={column}>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+};
+
+/*
+  const tableContainerRef = useRef<any>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    estimateSize: () => 40,
+    getScrollElement: () => tableContainerRef.current,
+    measureElement:
+      typeof window !== "undefined" &&
+      navigator.userAgent.indexOf("Firefox") === -1
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined,
+    overscan: 5,
+  });
+
+  return (
+    <Table
+      ref={tableContainerRef}
+      style={{
+        overflow: "auto",
+        position: "relative",
+        height: "95.5vh",
+      }}
+    >
+      <TableHeader>
+        <TableRow className="flex flex-row">
+          {rows.map((row) => (
+            <TableRow key={row}>
+              <Button variant={"link"} disabled className="w-24">
+                {row}
+              </Button>
+            </TableRow>
+          ))}
+          <Button variant={"link"} onClick={addRow} className="w-24">
+            +
+          </Button>
+          <Button variant={"link"} onClick={removeRow} className="w-24">
+            -
+          </Button>
+        </TableRow>
+      </TableHeader>
+      <TableBody
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          position: "relative",
+        }}
+      >
+        {Array.from(Array(noColumns).keys()).map((_column, idx) => (
+          <TableRow key={_column} className="flex flex-row">
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index];
+              return (
+                <TableCell key={row}>
                   <Input
                     type="number"
                     className="w-20 text-center"
-                    id={`cell-${rows[column]}-${idx}`}
-                    ref={(el) =>
-                      (cellRefs.current[`${rows[column]}-${idx}`] = el)
-                    }
-                    onInput={() => handleInputData(column, idx)}
+                    id={`cell-${row}-${idx}`}
+                    ref={(el) => (cellRefs.current[`${row}-${idx}`] = el)}
+                    onInput={() => handleInputData(virtualRow.index, idx)}
                   />
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell>
-              <Button
-                variant={"link"}
-                onClick={() => setNoColumns(noColumns + 1)}
-                className="w-12 text-center"
-              >
-                +
-              </Button>
-              <Button
-                variant={"link"}
-                onClick={removeColumn}
-                className="w-12 text-center"
-              >
-                -
-              </Button>
-            </TableCell>
+              );
+            })}
           </TableRow>
-        </TableBody>
-      </Table>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+        ))}
+        <TableRow>
+          <TableCell>
+            <Button
+              variant={"link"}
+              onClick={() => setNoColumns(noColumns + 1)}
+              className="w-12 text-center"
+            >
+              +
+            </Button>
+            <Button
+              variant={"link"}
+              onClick={removeColumn}
+              className="w-12 text-center"
+            >
+              -
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   );
-};
+
+*/

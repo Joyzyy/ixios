@@ -5,11 +5,12 @@ import (
 	"ixios-server/proto"
 	"ixios-server/rest_api/middlewares"
 	"net/http"
+
+	"github.com/redis/go-redis/v9"
 )
 
-func StatisticsRoutes(router *http.ServeMux, gRPC *proto.StatisticsServiceClient) {
-	// This function will contain the logic to handle the simple statistics routes
-	simple_statistics := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func StatisticsRoutes(router *http.ServeMux, gRPC *proto.StatisticsServiceClient, rdb *redis.Client) {
+	descriptive_statistics := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Body == nil {
 			http.Error(w, "empty request body", http.StatusBadRequest)
 			return
@@ -17,7 +18,7 @@ func StatisticsRoutes(router *http.ServeMux, gRPC *proto.StatisticsServiceClient
 
 		statisticalInput := r.Context().Value("statisticalInput").(*proto.StatisticsRequest)
 
-		response, err := (*gRPC).AnalyzeSimpleStatistics(r.Context(), statisticalInput)
+		response, err := (*gRPC).AnalyzeDescriptiveStatistics(r.Context(), statisticalInput)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -32,17 +33,21 @@ func StatisticsRoutes(router *http.ServeMux, gRPC *proto.StatisticsServiceClient
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(jsonResponse)
+		_, err = w.Write(jsonResponse)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
-	advanced_statistics := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	inferential_statistics := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Body == nil {
 			http.Error(w, "empty request body", http.StatusBadRequest)
 			return
 		}
 
 		statisticalInput := r.Context().Value("statisticalInput").(*proto.StatisticsRequest)
-		res, err := (*gRPC).AnalyzeAdvancedStatistics(r.Context(), statisticalInput)
+		res, err := (*gRPC).AnalyzeInferentialStatistics(r.Context(), statisticalInput)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -60,11 +65,12 @@ func StatisticsRoutes(router *http.ServeMux, gRPC *proto.StatisticsServiceClient
 	})
 
 	router.Handle(
-		"POST /v1/simple_statistics",
-		middlewares.Logger(middlewares.ConvertModelToProtoMiddleware(&simple_statistics)),
+		"POST /v1/statistics/descriptive",
+		middlewares.Logger(middlewares.ConvertModelToProtoMiddleware(&descriptive_statistics)),
 	)
+
 	router.Handle(
-		"POST /v1/advanced_statistics",
-		middlewares.Logger(middlewares.ConvertModelToProtoMiddleware(&advanced_statistics)),
+		"POST /v1/statistics/inferential",
+		middlewares.Logger(middlewares.ConvertModelToProtoMiddleware(&inferential_statistics)),
 	)
 }

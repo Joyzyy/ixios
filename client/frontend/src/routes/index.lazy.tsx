@@ -1,7 +1,10 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { ActionMenu } from "@/components/action-menu";
-import { ImportExportDialog } from "@/components/action_menu/import-export";
-import { SelectorStats } from "@/components/selector_stats";
+import { ActionMenuWrapper } from "@/components/action-menu";
+import { ImportExportDialogWrapper } from "@/components/action_menu/import-export";
+import { SelectorStatsWrapper } from "@/components/selector_stats";
+import { GraphsMenuWrapper } from "@/components/graphs-menu";
+import { UserMenuWrapper } from "@/components/user-menu";
+import { EquationsMenuWrapper } from "@/components/equations-menu";
 
 export const Route = createLazyFileRoute("/")({
   component: Index,
@@ -10,9 +13,12 @@ export const Route = createLazyFileRoute("/")({
 function Index() {
   return (
     <>
-      <ActionMenu />
-      <ImportExportDialog />
-      <SelectorStats />
+      <UserMenuWrapper />
+      <ActionMenuWrapper />
+      <ImportExportDialogWrapper />
+      <EquationsMenuWrapper />
+      <SelectorStatsWrapper />
+      <GraphsMenuWrapper />
     </>
   );
 }

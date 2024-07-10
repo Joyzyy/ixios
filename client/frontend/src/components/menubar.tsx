@@ -3,139 +3,210 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   actionMenuAtom,
   currentActionAtom,
+  dataInputAtoms,
   importExportDialogAtom,
+  userAccountDialogAtom,
+  userAtom,
 } from "@/features/atoms";
+import { identifiers } from "@/constants";
+import { DataInputType } from "@/features/models";
+import { useToast } from "./ui/use-toast";
 
-const MenubarSection = ({
-  title,
-  formats,
-  onMenuClick,
-}: {
-  title: string;
-  formats: string[];
-  onMenuClick: (format: string) => void;
-}) => {
+const FileMenu = () => {
+  const setImportExportDialogAtom = useSetAtom(importExportDialogAtom);
+
+  const MenubarSection = ({
+    title,
+    formats,
+    onMenuClick,
+  }: {
+    title: string;
+    formats: string[];
+    onMenuClick: (format: string) => void;
+  }) => {
+    return (
+      <MenubarSub>
+        <MenubarSubTrigger>{title}</MenubarSubTrigger>
+        <MenubarSubContent>
+          {formats.map((format) => (
+            <MenubarItem key={format} onClick={() => onMenuClick(format)}>
+              {format}
+            </MenubarItem>
+          ))}
+        </MenubarSubContent>
+      </MenubarSub>
+    );
+  };
+
   return (
-    <MenubarSub>
-      <MenubarSubTrigger>{title}</MenubarSubTrigger>
-      <MenubarSubContent>
-        {formats.map((format) => (
-          <MenubarItem key={format} onClick={() => onMenuClick(format)}>
-            {format}
-          </MenubarItem>
-        ))}
-      </MenubarSubContent>
-    </MenubarSub>
+    <MenubarMenu>
+      <MenubarTrigger>File</MenubarTrigger>
+      <MenubarContent>
+        <MenubarSection
+          title="Import"
+          formats={["XLS", "CSV", "JSON"]}
+          onMenuClick={(format) => {
+            setImportExportDialogAtom({ type: "Import", format: format });
+          }}
+        />
+      </MenubarContent>
+    </MenubarMenu>
+  );
+};
+
+const AnalysisMenu = (props: { data: DataInputType[]; toastRef: any }) => {
+  const setActionMenuAtom = useSetAtom(actionMenuAtom);
+  const setCurrentActionAtom = useSetAtom(currentActionAtom);
+
+  return (
+    <MenubarMenu>
+      <MenubarTrigger>Analysis</MenubarTrigger>
+      <MenubarContent>
+        <MenubarItem
+          onClick={() => {
+            if (props.data.length === 0) {
+              props.toastRef({
+                title: "No data",
+                description: "Please import data to run an analysis!",
+                variant: "destructive",
+              });
+              return;
+            }
+            setActionMenuAtom("selector_stats");
+            setCurrentActionAtom(identifiers.DESCRIPTIVE_STATISTICS);
+          }}
+        >
+          {identifiers.DESCRIPTIVE_STATISTICS}
+        </MenubarItem>
+        <MenubarItem
+          onClick={() => {
+            if (props.data.length === 0) {
+              props.toastRef({
+                title: "No data",
+                description: "Please import data to run an analysis!",
+                variant: "destructive",
+              });
+              return;
+            }
+            setActionMenuAtom("selector_stats");
+            setCurrentActionAtom(identifiers.INFERENTIAL_STATISTICS);
+          }}
+        >
+          {identifiers.INFERENTIAL_STATISTICS}
+        </MenubarItem>
+      </MenubarContent>
+    </MenubarMenu>
+  );
+};
+
+const GenerateMenu = (props: { data: DataInputType[]; toastRef: any }) => {
+  const setActionMenuAtom = useSetAtom(actionMenuAtom);
+
+  return (
+    <MenubarMenu>
+      <MenubarTrigger>Generate</MenubarTrigger>
+      <MenubarContent>
+        <MenubarItem
+          onClick={() => {
+            if (props.data.length === 0) {
+              props.toastRef({
+                title: "No data",
+                description: "Please import data to generate graphs.",
+                variant: "destructive",
+              });
+              return;
+            }
+            setActionMenuAtom("graphs");
+          }}
+        >
+          Graphs
+        </MenubarItem>
+        <MenubarItem
+          onClick={() => {
+            if (props.data.length === 0) {
+              props.toastRef({
+                title: "No data",
+                description: "Please import data to generate equations.",
+                variant: "destructive",
+              });
+              return;
+            }
+            setActionMenuAtom("equations");
+          }}
+        >
+          Equations
+        </MenubarItem>
+      </MenubarContent>
+    </MenubarMenu>
+  );
+};
+
+export const UserAccountMenu = () => {
+  const setUserAccountDialog = useSetAtom(userAccountDialogAtom);
+  const [user, setUser] = useAtom(userAtom);
+
+  return (
+    <MenubarMenu>
+      <MenubarTrigger className="font-bold">IXIOS</MenubarTrigger>
+      <MenubarContent>
+        {user ? (
+          <>
+            <MenubarItem>{user.username}</MenubarItem>
+            <MenubarItem>History</MenubarItem>
+            <MenubarItem
+              onClick={() => {
+                setUser(null);
+              }}
+            >
+              Logout
+            </MenubarItem>
+          </>
+        ) : (
+          <>
+            <MenubarItem
+              onClick={() =>
+                setUserAccountDialog({
+                  type: "Login",
+                })
+              }
+            >
+              Login
+            </MenubarItem>
+            <MenubarItem
+              onClick={() =>
+                setUserAccountDialog({
+                  type: "Register",
+                })
+              }
+            >
+              Register
+            </MenubarItem>
+          </>
+        )}
+      </MenubarContent>
+    </MenubarMenu>
   );
 };
 
 export const MainMenu = () => {
-  const setActionMenuAtom = useSetAtom(actionMenuAtom);
-  const setImportExportDialogAtom = useSetAtom(importExportDialogAtom);
-  const setCurrentActionAtom = useSetAtom(currentActionAtom);
+  const data = useAtomValue(dataInputAtoms.data);
+  const { toast } = useToast();
 
   return (
     <Menubar className="rounded-none border-b border-none px-2 lg:px-4">
-      <MenubarMenu>
-        <MenubarTrigger className="font-bold">IXIOS</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>About this app</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem>
-            Preferences... <MenubarShortcut>⌘,</MenubarShortcut>
-          </MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem>
-            Hide sheet... <MenubarShortcut>⌘H</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Hide all... <MenubarShortcut>⇧⌘H</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Quit <MenubarShortcut>⌘Q</MenubarShortcut>
-          </MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>File</MenubarTrigger>
-        <MenubarContent>
-          <MenubarSub>
-            <MenubarSubTrigger>New</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>
-                New file <MenubarShortcut>⌘N</MenubarShortcut>
-              </MenubarItem>
-              <MenubarItem>
-                File from history <i className="mr-3" />{" "}
-                <MenubarShortcut>⇧⌘T</MenubarShortcut>
-              </MenubarItem>
-              <MenubarItem>
-                File folder <MenubarShortcut>⌘T</MenubarShortcut>
-              </MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarItem>
-            Open... <MenubarShortcut>⌘U</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Clear file <MenubarShortcut>⌘W</MenubarShortcut>
-          </MenubarItem>
-          <MenubarSeparator />
-          <MenubarSection
-            title="Import"
-            formats={["XLS", "CSV", "JSON"]}
-            onMenuClick={(format) => {
-              setImportExportDialogAtom({ type: "Import", format: format });
-            }}
-          />
-          <MenubarSection
-            title="Export"
-            formats={["XLS", "CSV", "JSON"]}
-            onMenuClick={(format) => {
-              setImportExportDialogAtom({ type: "Export", format: format });
-            }}
-          />
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>Action</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem
-            onClick={() => {
-              setActionMenuAtom("selector_stats");
-              setCurrentActionAtom("Simple statistics");
-            }}
-          >
-            Simple statistics
-          </MenubarItem>
-          <MenubarItem
-            onClick={() => {
-              setActionMenuAtom("selector_stats");
-              setCurrentActionAtom("Advanced statistics - Econometrics");
-            }}
-          >
-            Advanced statistics - Econometrics
-          </MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>Equation</MenubarTrigger>
-        <MenubarContent></MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>Visualize</MenubarTrigger>
-      </MenubarMenu>
+      <UserAccountMenu />
+      <FileMenu />
+      <AnalysisMenu data={data} toastRef={toast} />
+      <GenerateMenu data={data} toastRef={toast} />
     </Menubar>
   );
 };

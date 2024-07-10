@@ -1,3 +1,4 @@
+from google.protobuf import struct_pb2 as _struct_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
@@ -21,10 +22,14 @@ class StatisticsRequest(_message.Message):
     methods: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, data: _Optional[_Iterable[_Union[StatisticsDataType, _Mapping]]] = ..., methods: _Optional[_Iterable[str]] = ...) -> None: ...
 
-class StatisticsResponse(_message.Message):
-    __slots__ = ("steps", "result")
-    STEPS_FIELD_NUMBER: _ClassVar[int]
+class StatisticsDescriptiveResponse(_message.Message):
+    __slots__ = ("result",)
     RESULT_FIELD_NUMBER: _ClassVar[int]
-    steps: str
     result: str
-    def __init__(self, steps: _Optional[str] = ..., result: _Optional[str] = ...) -> None: ...
+    def __init__(self, result: _Optional[str] = ...) -> None: ...
+
+class StatisticsInferentialResponse(_message.Message):
+    __slots__ = ("result",)
+    RESULT_FIELD_NUMBER: _ClassVar[int]
+    result: _struct_pb2.Struct
+    def __init__(self, result: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ...) -> None: ...

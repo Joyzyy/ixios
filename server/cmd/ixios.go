@@ -1,15 +1,16 @@
 package main
 
 import (
-	"ixios-server/db"
 	"ixios-server/grpc"
 	"ixios-server/proto"
 	rest "ixios-server/rest_api"
 	"ixios-server/rest_api/routes"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
@@ -20,15 +21,13 @@ func main() {
 	}
 	log.Println("Loaded .env")
 
-	// setup database connection
-	dbConn, err := db.InitDatabaseConnection()
-	if err != nil {
-		log.Fatalf("encountered error while initializing db: %v", err)
-	}
-	defer dbConn.Close()
-	log.Println("Connected to database")
-
-	_ = db.InitDatabase(dbConn)
+	// setup redis client
+	// rdb, err := db.InitializeRedisClient()
+	// if err != nil {
+	// 	log.Fatalf("encountered error while initializing redis client: %v", err)
+	// }
+	// defer rdb.Close()
+	log.Println("Initialized Redis client")
 
 	// setup grpc client
 	gRPC, err := grpc.InitGrpcClient()
@@ -37,7 +36,6 @@ func main() {
 	}
 	defer gRPC.Close()
 	log.Println("Initialized gRPC client")
-
 	// setup grpc contract clients
 	statisticsGRPC := proto.NewStatisticsServiceClient(gRPC)
 
@@ -46,9 +44,14 @@ func main() {
 	defer server.Close()
 	log.Println("Initialized HTTP server")
 
-	// setup routes
-	routes.StatisticsRoutes(router, &statisticsGRPC)
+	// setup chatgpt client
+	chatGPTClient := openai.NewClient(os.Getenv("OPENAPI_KEY"))
+	log.Println("Initialized OpenAI client")
 
+	// setup routes
+	routes.StatisticsRoutes(router, &statisticsGRPC, nil)
+	routes.UserRoutes(router, nil)
+	routes.OpenAIRoutes(router, chatGPTClient)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("encountered error while initializing http server: %v", err)
 	}
