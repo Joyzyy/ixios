@@ -10,10 +10,10 @@ import (
 func InitHttpServer(port int) (*http.ServeMux, *http.Server) {
 	mux := http.NewServeMux()
 
-	corsHandler := cors.Default().Handler(mux)
+	corsHandler := cors.AllowAll().Handler(mux)
 
 	return mux, &http.Server{
-		Addr:    fmt.Sprintf("localhost:%d", port),
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: corsHandler,
 	}
 }
