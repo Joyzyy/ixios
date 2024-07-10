@@ -1,17 +1,17 @@
-name: Deploy Static Assets
+name: Deploy Microservices
 
 on:
   push:
     branches:
       - main
     paths:
-      - "client/**"
-
+      - "server/**"
+      - "analysis_server/**"
 jobs:
-  build_and_push_fe:
+  build_microservices:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Static Assets
+      - name: Deploy Dockerized Microservices (GO Server & Analysis Server)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_IP }}
@@ -21,7 +21,6 @@ jobs:
             cd ixios/
             git fetch
             git pull
-            cd client/frontend
-            bun run build
-            rm -rf /www/data/dist
-            mv dist /www/data/
+            docker compose down
+            docker image rm ixios_server ixios_analysis-server
+            docker compose up -d
