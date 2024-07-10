@@ -54,5 +54,5 @@ func OpenAIRoutes(router *http.ServeMux, gptClient *openai.Client) {
 		w.Write(encoded)
 	})
 
-	router.Handle("/openai/call", call_route)
+	router.Handle("POST /v1/openai", call_route)
 }

@@ -72,7 +72,7 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
     Object?.keys(steps)?.map(async (key) => {
       try {
         setIsLoading(true);
-        // let completion = await fetch(`http://localhost:8080/openai/call`, {
+        // let completion = await fetch(`http://localhost:8080/v1/openai`, {
         //   method: "POST",
         //   body: JSON.stringify({
         //     model: "gpt-3.5-turbo",

@@ -1,0 +1,13 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+  analysis_server:
+    build:
+      context: ./analysis_server
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
