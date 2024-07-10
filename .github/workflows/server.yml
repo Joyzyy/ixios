@@ -22,5 +22,5 @@ jobs:
             git fetch
             git pull
             docker compose down
-            docker image rm ixios_server ixios_analysis-server
+            docker image rm ixios-server ixios-analysis_server
             docker compose up -d
