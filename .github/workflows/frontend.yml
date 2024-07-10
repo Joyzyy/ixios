@@ -1,0 +1,27 @@
+name: Deploy Static Assets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**'
+
+jobs:
+  build_and_push_fe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Static Assets
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: $${{ secrets.VPS_IP }}
+          username: $${{ secrets.VPS_USER }}
+          key: $${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ixios/
+            git fetch
+            git pull
+            cd client/frontend
+            bun run build
+            rm -rf /www/data/dist
+            mv dist /www/data/
