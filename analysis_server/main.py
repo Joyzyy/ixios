@@ -6,12 +6,6 @@ from stats import descriptive, inferential
 from google.protobuf.struct_pb2 import Struct
 from grpc_reflection.v1alpha import reflection
 
-def process_method(method, data):
-    if method in inferential.AVAILABLE_METHODS:
-        r, p, _ = inferential.AVAILABLE_METHODS[method](data)
-        return method, {'steps': r, 'graphs': p}
-    return method, None
-
 class StatisticsServicer(ss_grpc.StatisticsServiceServicer):
     def AnalyzeDescriptiveStatistics(self, request, context):
         print(f"Got request: {request}")
