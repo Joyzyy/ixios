@@ -49,10 +49,6 @@ func main() {
 	log.Println("Initialized OpenAI client")
 
 	// setup routes
-	router.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Welcome to IXIOS"))
-	})
 	routes.StatisticsRoutes(router, &statisticsGRPC, nil)
 	routes.UserRoutes(router, nil)
 	routes.OpenAIRoutes(router, chatGPTClient)
