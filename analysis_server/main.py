@@ -51,11 +51,14 @@ class StatisticsServicer(ss_grpc.StatisticsServiceServicer):
             return ss_proto.StatisticsInferentialResponse(result=None)
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    ss_grpc.add_StatisticsServiceServicer_to_server(StatisticsServicer(), server)
-    server.add_insecure_port('[::]:50051')
-    server.start()
-    server.wait_for_termination()
+    try:
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        ss_grpc.add_StatisticsServiceServicer_to_server(StatisticsServicer(), server)
+        server.add_insecure_port('[::]:50051')
+        server.start()
+        server.wait_for_termination()
+    except Exception as e:
+        print(f'Error: {e}')
 
 if __name__ == "__main__":
     print("Server started")
