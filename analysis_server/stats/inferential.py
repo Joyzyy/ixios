@@ -13,7 +13,6 @@ from scipy.stats import norm
 import numpy as np
 import scipy.stats as scipy
 import math
-import sympy
 
 def transform_equation(new_data, if_specific):
     equations = if_specific.get('equations', [])
