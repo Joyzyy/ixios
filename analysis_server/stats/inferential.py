@@ -12,12 +12,27 @@ import seaborn as sns
 from scipy.stats import norm
 import numpy as np
 import scipy.stats as scipy
+import math
+import sympy
 
-def calculate_ols(data: StatisticsDataType):
+def transform_equation(new_data, if_specific):
+    equations = if_specific.get('equations', [])
+    if equations:
+        for equation in equations:
+            for i_eq in equation:
+                if i_eq['transformation'] == 'sqrt':
+                    new_data[i_eq['row']] = new_data[i_eq['row']].apply(lambda x: x ** 0.5)
+                elif i_eq['transformation'] == 'log':
+                    new_data[i_eq['row']] = new_data[i_eq['row']].apply(lambda x: math.log(x))
+                elif i_eq['transformation'] == 'diff':    
+                    new_data[i_eq['row']] = np.gradient(new_data[i_eq['row']])
+
+def calculate_ols(data: StatisticsDataType, if_specific: dict):
     data_dict = {}
     for item in data:
         data_dict[item.row] = list(item.values)
     new_data = pd.DataFrame.from_dict(data_dict, orient='index').T
+    transform_equation(new_data, if_specific)
 
     dependent_var = "Y" if "Y" in data_dict else sorted(data_dict.keys())[0]
     independent_vars = [key for key in data_dict.keys() if key != dependent_var]
@@ -54,7 +69,7 @@ def calculate_ols(data: StatisticsDataType):
         "data": f"data:image/png;base64,{part_reg_plot_hash}"
     }), ols_model
 
-def calculate_anova(data: StatisticsDataType):
+def calculate_anova(data: StatisticsDataType, if_specific: dict):
     data_dict = {}
     for item in data:
         for value in item.values:
@@ -94,8 +109,8 @@ def calculate_anova(data: StatisticsDataType):
         "data": f"data:image/png;base64,{plt_hash}"
     }), None
 
-def calculate_white_test(data: StatisticsDataType):
-    _, _, ols = calculate_ols(data)
+def calculate_white_test(data: StatisticsDataType, if_specific: dict):
+    _, _, ols = calculate_ols(data, if_specific)
     white_test = sm.stats.diagnostic.het_white(ols.resid, ols.model.exog)
 
     lm_statistic = white_test[0]
@@ -132,8 +147,8 @@ def calculate_white_test(data: StatisticsDataType):
         print(f'error: {e}')
         return json.dumps({}), -1, None
 
-def calculate_durbin_watson(data: StatisticsDataType):
-    _, _, ols = calculate_ols(data)
+def calculate_durbin_watson(data: StatisticsDataType, if_specific: dict):
+    _, _, ols = calculate_ols(data, if_specific)
     dw = sm.stats.stattools.durbin_watson(ols.resid)
 
     dw_table = f"\\begin{{matrix}} \\ \
@@ -162,8 +177,8 @@ def calculate_durbin_watson(data: StatisticsDataType):
         "data": f"data:image/png;base64,{plot_base64}"
     }), None
 
-def calculate_jarque_bera(data: StatisticsDataType):
-    _, _, ols = calculate_ols(data)
+def calculate_jarque_bera(data: StatisticsDataType, if_specific: dict):
+    _, _, ols = calculate_ols(data, if_specific)
     jb = sm.stats.jarque_bera(ols.resid)
 
     jb_stat = jb[0]
@@ -208,11 +223,12 @@ def calculate_jarque_bera(data: StatisticsDataType):
         "data": f"data:image/png;base64,{plot_base64}"
     }), None
 
-def calculate_pearson_corr(data: StatisticsDataType):
+def calculate_pearson_corr(data: StatisticsDataType, if_specific: dict):
     data_dict = {}
     for item in data:
         data_dict[item.row] = list(item.values)
     new_data = pd.DataFrame.from_dict(data_dict, orient='index').T
+    transform_equation(new_data, if_specific)
 
     try:
         pearson_corr = scipy.pearsonr(new_data.iloc[:, 0], new_data.iloc[:, 1])
@@ -245,11 +261,12 @@ def calculate_pearson_corr(data: StatisticsDataType):
         "data": f"data:image/png;base64,{plot_base64}"
     }), None
 
-def calculate_spearman_corr(data: StatisticsDataType):
+def calculate_spearman_corr(data: StatisticsDataType, if_specific: dict):
     data_dict = {}
     for item in data:
         data_dict[item.row] = list(item.values)
     new_data = pd.DataFrame.from_dict(data_dict, orient='index').T
+    transform_equation(new_data, if_specific)
 
     spearman_corr = scipy.spearmanr(new_data.iloc[:, 0], new_data.iloc[:, 1:])
     

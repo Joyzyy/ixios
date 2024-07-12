@@ -2,6 +2,7 @@ import {
   Menubar,
   MenubarContent,
   MenubarItem,
+  MenubarLabel,
   MenubarMenu,
   MenubarSub,
   MenubarSubContent,
@@ -102,6 +103,22 @@ const AnalysisMenu = (props: { data: DataInputType[]; toastRef: any }) => {
           }}
         >
           {identifiers.INFERENTIAL_STATISTICS}
+        </MenubarItem>
+        <MenubarItem
+          onClick={() => {
+            if (props.data.length === 0) {
+              props.toastRef({
+                title: "No data",
+                description: "Please import data to run an analysis!",
+                variant: "destructive",
+              });
+              return;
+            }
+            setActionMenuAtom("selector_stats");
+            setCurrentActionAtom(identifiers.TIME_SERIES_ANALYSIS);
+          }}
+        >
+          {identifiers.TIME_SERIES_ANALYSIS}
         </MenubarItem>
       </MenubarContent>
     </MenubarMenu>

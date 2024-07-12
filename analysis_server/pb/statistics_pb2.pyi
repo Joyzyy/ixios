@@ -22,13 +22,33 @@ class StatisticsRequest(_message.Message):
     methods: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, data: _Optional[_Iterable[_Union[StatisticsDataType, _Mapping]]] = ..., methods: _Optional[_Iterable[str]] = ...) -> None: ...
 
+class InferentialStatisticsRequest(_message.Message):
+    __slots__ = ("data", "methods", "if_specific")
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    METHODS_FIELD_NUMBER: _ClassVar[int]
+    IF_SPECIFIC_FIELD_NUMBER: _ClassVar[int]
+    data: _containers.RepeatedCompositeFieldContainer[StatisticsDataType]
+    methods: _containers.RepeatedScalarFieldContainer[str]
+    if_specific: _struct_pb2.Struct
+    def __init__(self, data: _Optional[_Iterable[_Union[StatisticsDataType, _Mapping]]] = ..., methods: _Optional[_Iterable[str]] = ..., if_specific: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ...) -> None: ...
+
+class TimeSeriesAnalysisRequest(_message.Message):
+    __slots__ = ("data", "methods", "ts_specific")
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    METHODS_FIELD_NUMBER: _ClassVar[int]
+    TS_SPECIFIC_FIELD_NUMBER: _ClassVar[int]
+    data: _containers.RepeatedCompositeFieldContainer[StatisticsDataType]
+    methods: _containers.RepeatedScalarFieldContainer[str]
+    ts_specific: _struct_pb2.Struct
+    def __init__(self, data: _Optional[_Iterable[_Union[StatisticsDataType, _Mapping]]] = ..., methods: _Optional[_Iterable[str]] = ..., ts_specific: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ...) -> None: ...
+
 class StatisticsDescriptiveResponse(_message.Message):
     __slots__ = ("result",)
     RESULT_FIELD_NUMBER: _ClassVar[int]
     result: str
     def __init__(self, result: _Optional[str] = ...) -> None: ...
 
-class StatisticsInferentialResponse(_message.Message):
+class AnyhowResponse(_message.Message):
     __slots__ = ("result",)
     RESULT_FIELD_NUMBER: _ClassVar[int]
     result: _struct_pb2.Struct

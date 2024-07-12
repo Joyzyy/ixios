@@ -3,8 +3,8 @@ import { ActionMenuWrapper } from "@/components/action-menu";
 import { ImportExportDialogWrapper } from "@/components/action_menu/import-export";
 import { SelectorStatsWrapper } from "@/components/selector_stats";
 import { GraphsMenuWrapper } from "@/components/graphs-menu";
-import { UserMenuWrapper } from "@/components/user-menu";
 import { EquationsMenuWrapper } from "@/components/equations-menu";
+import { UserMenuWrapper } from "@/components/user-menu";
 
 export const Route = createLazyFileRoute("/")({
   component: Index,

@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10statistics.proto\x12\nstatistics\x1a\x1cgoogle/protobuf/struct.proto\"1\n\x12StatisticsDataType\x12\x0b\n\x03row\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x03(\x02\"R\n\x11StatisticsRequest\x12,\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1e.statistics.StatisticsDataType\x12\x0f\n\x07methods\x18\x02 \x03(\t\"/\n\x1dStatisticsDescriptiveResponse\x12\x0e\n\x06result\x18\x01 \x01(\t\"H\n\x1dStatisticsInferentialResponse\x12\'\n\x06result\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct2\xe7\x01\n\x11StatisticsService\x12h\n\x1c\x41nalyzeDescriptiveStatistics\x12\x1d.statistics.StatisticsRequest\x1a).statistics.StatisticsDescriptiveResponse\x12h\n\x1c\x41nalyzeInferentialStatistics\x12\x1d.statistics.StatisticsRequest\x1a).statistics.StatisticsInferentialResponseB\x11Z\x0f./server/proto/b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10statistics.proto\x12\nstatistics\x1a\x1cgoogle/protobuf/struct.proto\"1\n\x12StatisticsDataType\x12\x0b\n\x03row\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x03(\x02\"R\n\x11StatisticsRequest\x12,\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1e.statistics.StatisticsDataType\x12\x0f\n\x07methods\x18\x02 \x03(\t\"\x8b\x01\n\x1cInferentialStatisticsRequest\x12,\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1e.statistics.StatisticsDataType\x12\x0f\n\x07methods\x18\x02 \x03(\t\x12,\n\x0bif_specific\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\"\x88\x01\n\x19TimeSeriesAnalysisRequest\x12,\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1e.statistics.StatisticsDataType\x12\x0f\n\x07methods\x18\x02 \x03(\t\x12,\n\x0bts_specific\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\"/\n\x1dStatisticsDescriptiveResponse\x12\x0e\n\x06result\x18\x01 \x01(\t\"9\n\x0e\x41nyhowResponse\x12\'\n\x06result\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct2\xc5\x02\n\x11StatisticsService\x12h\n\x1c\x41nalyzeDescriptiveStatistics\x12\x1d.statistics.StatisticsRequest\x1a).statistics.StatisticsDescriptiveResponse\x12\x64\n\x1c\x41nalyzeInferentialStatistics\x12(.statistics.InferentialStatisticsRequest\x1a\x1a.statistics.AnyhowResponse\x12`\n\x1b\x41nalyzeTimeSeriesStatistics\x12%.statistics.TimeSeriesAnalysisRequest\x1a\x1a.statistics.AnyhowResponseB\x11Z\x0f./server/proto/b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -27,10 +27,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_STATISTICSDATATYPE']._serialized_end=111
   _globals['_STATISTICSREQUEST']._serialized_start=113
   _globals['_STATISTICSREQUEST']._serialized_end=195
-  _globals['_STATISTICSDESCRIPTIVERESPONSE']._serialized_start=197
-  _globals['_STATISTICSDESCRIPTIVERESPONSE']._serialized_end=244
-  _globals['_STATISTICSINFERENTIALRESPONSE']._serialized_start=246
-  _globals['_STATISTICSINFERENTIALRESPONSE']._serialized_end=318
-  _globals['_STATISTICSSERVICE']._serialized_start=321
-  _globals['_STATISTICSSERVICE']._serialized_end=552
+  _globals['_INFERENTIALSTATISTICSREQUEST']._serialized_start=198
+  _globals['_INFERENTIALSTATISTICSREQUEST']._serialized_end=337
+  _globals['_TIMESERIESANALYSISREQUEST']._serialized_start=340
+  _globals['_TIMESERIESANALYSISREQUEST']._serialized_end=476
+  _globals['_STATISTICSDESCRIPTIVERESPONSE']._serialized_start=478
+  _globals['_STATISTICSDESCRIPTIVERESPONSE']._serialized_end=525
+  _globals['_ANYHOWRESPONSE']._serialized_start=527
+  _globals['_ANYHOWRESPONSE']._serialized_end=584
+  _globals['_STATISTICSSERVICE']._serialized_start=587
+  _globals['_STATISTICSSERVICE']._serialized_end=912
 # @@protoc_insertion_point(module_scope)

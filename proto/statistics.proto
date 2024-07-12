@@ -7,7 +7,8 @@ option go_package = "./server/proto/";
 
 service StatisticsService {
     rpc AnalyzeDescriptiveStatistics(StatisticsRequest) returns (StatisticsDescriptiveResponse);
-    rpc AnalyzeInferentialStatistics(StatisticsRequest) returns (StatisticsInferentialResponse);
+    rpc AnalyzeInferentialStatistics(InferentialStatisticsRequest) returns (AnyhowResponse);
+    rpc AnalyzeTimeSeriesStatistics(TimeSeriesAnalysisRequest) returns (AnyhowResponse);
 }
 
 message StatisticsDataType {
@@ -20,10 +21,22 @@ message StatisticsRequest {
     repeated string methods = 2;
 }
 
+message InferentialStatisticsRequest {
+    repeated StatisticsDataType data = 1;
+    repeated string methods = 2;
+    google.protobuf.Struct if_specific = 3;
+}
+
+message TimeSeriesAnalysisRequest {
+    repeated StatisticsDataType data = 1;
+    repeated string methods = 2;
+    google.protobuf.Struct ts_specific = 3;
+}
+
 message StatisticsDescriptiveResponse {
     string result = 1;
 }
 
-message StatisticsInferentialResponse {
+message AnyhowResponse {
     google.protobuf.Struct result = 1;
 }

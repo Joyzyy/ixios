@@ -14,7 +14,6 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -131,7 +130,7 @@ const GraphsMenu: React.FC = () => {
             </Button>
           </div>
           {transformedData && graphType === "line" && (
-            <ChartContainer config={chartConfig} className="h-full w-full">
+            <ChartContainer config={chartConfig} className="h-[75vh] w-full">
               <LineChart
                 width={500}
                 height={300}
@@ -157,7 +156,7 @@ const GraphsMenu: React.FC = () => {
             </ChartContainer>
           )}
           {transformedData && graphType === "bar" && (
-            <ChartContainer config={chartConfig} className="h-full w-full">
+            <ChartContainer config={chartConfig} className="h-[75vh] w-full">
               <BarChart
                 width={500}
                 height={300}
@@ -182,7 +181,7 @@ const GraphsMenu: React.FC = () => {
             </ChartContainer>
           )}
           {transformedData && graphType === "pie" && (
-            <ChartContainer config={chartConfig} className="h-full w-full">
+            <ChartContainer config={chartConfig} className="h-[75vh] w-full">
               <PieChart width={500} height={300}>
                 <Pie
                   data={readableData.map((item) => ({
@@ -209,7 +208,7 @@ const GraphsMenu: React.FC = () => {
             </ChartContainer>
           )}
           {transformedData && graphType === "scatter" && (
-            <ChartContainer config={chartConfig} className="h-full w-full">
+            <ChartContainer config={chartConfig} className="h-[75vh] w-full">
               <ScatterChart
                 width={500}
                 height={300}

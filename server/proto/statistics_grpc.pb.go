@@ -23,7 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StatisticsServiceClient interface {
 	AnalyzeDescriptiveStatistics(ctx context.Context, in *StatisticsRequest, opts ...grpc.CallOption) (*StatisticsDescriptiveResponse, error)
-	AnalyzeInferentialStatistics(ctx context.Context, in *StatisticsRequest, opts ...grpc.CallOption) (*StatisticsInferentialResponse, error)
+	AnalyzeInferentialStatistics(ctx context.Context, in *InferentialStatisticsRequest, opts ...grpc.CallOption) (*AnyhowResponse, error)
+	AnalyzeTimeSeriesStatistics(ctx context.Context, in *TimeSeriesAnalysisRequest, opts ...grpc.CallOption) (*AnyhowResponse, error)
 }
 
 type statisticsServiceClient struct {
@@ -43,9 +44,18 @@ func (c *statisticsServiceClient) AnalyzeDescriptiveStatistics(ctx context.Conte
 	return out, nil
 }
 
-func (c *statisticsServiceClient) AnalyzeInferentialStatistics(ctx context.Context, in *StatisticsRequest, opts ...grpc.CallOption) (*StatisticsInferentialResponse, error) {
-	out := new(StatisticsInferentialResponse)
+func (c *statisticsServiceClient) AnalyzeInferentialStatistics(ctx context.Context, in *InferentialStatisticsRequest, opts ...grpc.CallOption) (*AnyhowResponse, error) {
+	out := new(AnyhowResponse)
 	err := c.cc.Invoke(ctx, "/statistics.StatisticsService/AnalyzeInferentialStatistics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statisticsServiceClient) AnalyzeTimeSeriesStatistics(ctx context.Context, in *TimeSeriesAnalysisRequest, opts ...grpc.CallOption) (*AnyhowResponse, error) {
+	out := new(AnyhowResponse)
+	err := c.cc.Invoke(ctx, "/statistics.StatisticsService/AnalyzeTimeSeriesStatistics", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +67,8 @@ func (c *statisticsServiceClient) AnalyzeInferentialStatistics(ctx context.Conte
 // for forward compatibility
 type StatisticsServiceServer interface {
 	AnalyzeDescriptiveStatistics(context.Context, *StatisticsRequest) (*StatisticsDescriptiveResponse, error)
-	AnalyzeInferentialStatistics(context.Context, *StatisticsRequest) (*StatisticsInferentialResponse, error)
+	AnalyzeInferentialStatistics(context.Context, *InferentialStatisticsRequest) (*AnyhowResponse, error)
+	AnalyzeTimeSeriesStatistics(context.Context, *TimeSeriesAnalysisRequest) (*AnyhowResponse, error)
 	mustEmbedUnimplementedStatisticsServiceServer()
 }
 
@@ -68,8 +79,11 @@ type UnimplementedStatisticsServiceServer struct {
 func (UnimplementedStatisticsServiceServer) AnalyzeDescriptiveStatistics(context.Context, *StatisticsRequest) (*StatisticsDescriptiveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AnalyzeDescriptiveStatistics not implemented")
 }
-func (UnimplementedStatisticsServiceServer) AnalyzeInferentialStatistics(context.Context, *StatisticsRequest) (*StatisticsInferentialResponse, error) {
+func (UnimplementedStatisticsServiceServer) AnalyzeInferentialStatistics(context.Context, *InferentialStatisticsRequest) (*AnyhowResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AnalyzeInferentialStatistics not implemented")
+}
+func (UnimplementedStatisticsServiceServer) AnalyzeTimeSeriesStatistics(context.Context, *TimeSeriesAnalysisRequest) (*AnyhowResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AnalyzeTimeSeriesStatistics not implemented")
 }
 func (UnimplementedStatisticsServiceServer) mustEmbedUnimplementedStatisticsServiceServer() {}
 
@@ -103,7 +117,7 @@ func _StatisticsService_AnalyzeDescriptiveStatistics_Handler(srv interface{}, ct
 }
 
 func _StatisticsService_AnalyzeInferentialStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StatisticsRequest)
+	in := new(InferentialStatisticsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -115,7 +129,25 @@ func _StatisticsService_AnalyzeInferentialStatistics_Handler(srv interface{}, ct
 		FullMethod: "/statistics.StatisticsService/AnalyzeInferentialStatistics",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StatisticsServiceServer).AnalyzeInferentialStatistics(ctx, req.(*StatisticsRequest))
+		return srv.(StatisticsServiceServer).AnalyzeInferentialStatistics(ctx, req.(*InferentialStatisticsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StatisticsService_AnalyzeTimeSeriesStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimeSeriesAnalysisRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatisticsServiceServer).AnalyzeTimeSeriesStatistics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/statistics.StatisticsService/AnalyzeTimeSeriesStatistics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatisticsServiceServer).AnalyzeTimeSeriesStatistics(ctx, req.(*TimeSeriesAnalysisRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -134,6 +166,10 @@ var StatisticsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AnalyzeInferentialStatistics",
 			Handler:    _StatisticsService_AnalyzeInferentialStatistics_Handler,
+		},
+		{
+			MethodName: "AnalyzeTimeSeriesStatistics",
+			Handler:    _StatisticsService_AnalyzeTimeSeriesStatistics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

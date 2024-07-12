@@ -204,6 +204,7 @@ const UserMenu: React.FC<{
     <Dialog
       open={!!props.userAccountDialog}
       onOpenChange={() => props.setUserAccountDialog(null)}
+      modal={true}
     >
       <DialogContent className="sm:max-w-[425px]">
         {props.userAccountDialog.type === "Login" && (

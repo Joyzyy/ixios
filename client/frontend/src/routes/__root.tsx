@@ -1,7 +1,8 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { MainMenu } from "@/components/menubar";
 import { DataInput } from "@/components/data-input";
 import { Toaster } from "@/components/ui/toaster";
+import { UserDropdown } from "@/components/user-dropdown";
 
 const DesktopNavigation: React.FC<{
   children: React.ReactNode;

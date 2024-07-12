@@ -46,8 +46,13 @@ class StatisticsServiceStub(object):
                 _registered_method=True)
         self.AnalyzeInferentialStatistics = channel.unary_unary(
                 '/statistics.StatisticsService/AnalyzeInferentialStatistics',
-                request_serializer=statistics__pb2.StatisticsRequest.SerializeToString,
-                response_deserializer=statistics__pb2.StatisticsInferentialResponse.FromString,
+                request_serializer=statistics__pb2.InferentialStatisticsRequest.SerializeToString,
+                response_deserializer=statistics__pb2.AnyhowResponse.FromString,
+                _registered_method=True)
+        self.AnalyzeTimeSeriesStatistics = channel.unary_unary(
+                '/statistics.StatisticsService/AnalyzeTimeSeriesStatistics',
+                request_serializer=statistics__pb2.TimeSeriesAnalysisRequest.SerializeToString,
+                response_deserializer=statistics__pb2.AnyhowResponse.FromString,
                 _registered_method=True)
 
 
@@ -66,6 +71,12 @@ class StatisticsServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def AnalyzeTimeSeriesStatistics(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_StatisticsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -76,8 +87,13 @@ def add_StatisticsServiceServicer_to_server(servicer, server):
             ),
             'AnalyzeInferentialStatistics': grpc.unary_unary_rpc_method_handler(
                     servicer.AnalyzeInferentialStatistics,
-                    request_deserializer=statistics__pb2.StatisticsRequest.FromString,
-                    response_serializer=statistics__pb2.StatisticsInferentialResponse.SerializeToString,
+                    request_deserializer=statistics__pb2.InferentialStatisticsRequest.FromString,
+                    response_serializer=statistics__pb2.AnyhowResponse.SerializeToString,
+            ),
+            'AnalyzeTimeSeriesStatistics': grpc.unary_unary_rpc_method_handler(
+                    servicer.AnalyzeTimeSeriesStatistics,
+                    request_deserializer=statistics__pb2.TimeSeriesAnalysisRequest.FromString,
+                    response_serializer=statistics__pb2.AnyhowResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -132,8 +148,35 @@ class StatisticsService(object):
             request,
             target,
             '/statistics.StatisticsService/AnalyzeInferentialStatistics',
-            statistics__pb2.StatisticsRequest.SerializeToString,
-            statistics__pb2.StatisticsInferentialResponse.FromString,
+            statistics__pb2.InferentialStatisticsRequest.SerializeToString,
+            statistics__pb2.AnyhowResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AnalyzeTimeSeriesStatistics(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/statistics.StatisticsService/AnalyzeTimeSeriesStatistics',
+            statistics__pb2.TimeSeriesAnalysisRequest.SerializeToString,
+            statistics__pb2.AnyhowResponse.FromString,
             options,
             channel_credentials,
             insecure,

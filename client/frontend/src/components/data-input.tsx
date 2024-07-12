@@ -72,7 +72,7 @@ export const DataInput = () => {
     event: React.FormEvent<HTMLInputElement>
   ) => {
     const inputElement = event.currentTarget.value;
-    if (!/^-?\d*[,]?\d*$/.test(inputElement)) {
+    if (!/^-?\d*[.,]?\d*$/.test(inputElement)) {
       toast({
         title: "Invalid input",
         description: "Please enter a valid number.",

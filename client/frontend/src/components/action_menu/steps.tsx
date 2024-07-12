@@ -8,6 +8,7 @@ import Markdown from "react-markdown";
 import { LoadingSpinner } from "../ui/spinner";
 import { useAtomValue } from "jotai";
 import { currentActionAtom } from "@/features/atoms";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 type TProps = {
   steps: any;
@@ -66,12 +67,10 @@ const DescriptiveStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
 const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
   const [interpretation, setInterpretation] = useState<any>({});
   const currentAction = useAtomValue(currentActionAtom);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
     if (currentAction !== identifiers.INFERENTIAL_STATISTICS) return;
     Object?.keys(steps)?.map(async (key) => {
       try {
-        setIsLoading(true);
         // let completion = await fetch(`http://localhost:8080/v1/openai`, {
         //   method: "POST",
         //   body: JSON.stringify({
@@ -120,16 +119,12 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
           }, 2000);
         }
       } catch (err) {
-        setIsLoading(false);
         console.error(err);
-      } finally {
-        setIsLoading(false);
       }
     });
 
     return () => {
       setInterpretation({});
-      setIsLoading(false);
     };
   }, [steps, currentAction]);
 
@@ -191,6 +186,60 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
   );
 };
 
+const TimeSeriesAnalysisSteps: React.FC<TPropsStatistics> = ({ steps }) => {
+  return (
+    <>
+      {Object.keys(steps).map((key) => (
+        <section key={key}>
+          <h2 className="mb-4 text-3xl font-bold">
+            Methods on variable: {key}
+          </h2>
+          {steps[key].map((method: any) => (
+            <>
+              <h3 className="text-xl font-semibold mb-2 mt-2">
+                {JSON.parse(method.steps).method}
+              </h3>
+              <div className="rounded-lg border p-4 flex flex-row justify-center mb-2 w-full">
+                <ScrollArea className="h-1/2 w-full">
+                  <div className="flex justify-center items-center">
+                    {method &&
+                      method.steps &&
+                      JSON.parse(method.steps).html && (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(
+                              JSON.parse(method.steps).data
+                            ),
+                          }}
+                        />
+                      )}
+                    {method &&
+                      method.steps &&
+                      !JSON.parse(method.steps).html && (
+                        <InlineMath math={JSON.parse(method.steps).data} />
+                      )}
+                  </div>
+                  <hr className="mt-2 mb-2 w-full" />
+                  <p className="font-mono">Interpretation</p>
+                  <ScrollBar orientation="vertical" />
+                </ScrollArea>
+              </div>
+              <div className="flex flex-row justify-center items-center">
+                {method &&
+                  method.graphs &&
+                  JSON.parse(method.graphs).length > 0 &&
+                  JSON.parse(method.graphs).map((graph: any) => (
+                    <img src={graph.data} alt={`${key} graph`} loading="lazy" />
+                  ))}
+              </div>
+            </>
+          ))}
+        </section>
+      ))}
+    </>
+  );
+};
+
 export const StepsComponent: React.FC<TProps> = ({ steps, type }) => {
   const [stepsData, setStepsData] = useState<any>({});
   useEffect(() => {
@@ -205,6 +254,7 @@ export const StepsComponent: React.FC<TProps> = ({ steps, type }) => {
           console.error(err);
         }
       } else {
+        console.log("steps: ", steps);
         setStepsData(steps);
       }
     } catch (err) {
@@ -225,6 +275,8 @@ export const StepsComponent: React.FC<TProps> = ({ steps, type }) => {
       <div className="space-y-12">
         {type === identifiers.DESCRIPTIVE_STATISTICS ? (
           <DescriptiveStatisticsSteps steps={stepsData} />
+        ) : type === identifiers.TIME_SERIES_ANALYSIS ? (
+          <TimeSeriesAnalysisSteps steps={stepsData} />
         ) : (
           <InferentialStatisticsSteps steps={stepsData} />
         )}

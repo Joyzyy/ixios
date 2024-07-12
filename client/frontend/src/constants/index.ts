@@ -4,7 +4,7 @@ const STATISTIC_VARIABLES = "ABCDEFGHIJKLMNOPQRSTUVWZXY".split("").reverse();
 
 const NUMBER_PREDETERMINED = 2;
 
-const API_URL_V1 = "https://joylunow.dev/v1";
+const API_URL_V1 = "http://localhost:8080/v1";
 
 const STATISTICS_FORMULAS: {
   [key: string]: string;
@@ -156,9 +156,54 @@ export namespace options {
       value: "spearman_corr",
     }
   ];
+
+  export const TIME_SERIES_ANALYSIS: Option[] = [
+    {
+      label: "Autocorrelation",
+      value: "autocorrelation",
+    },
+    {
+      label: "Augmented Dickey-Fuller test",
+      value: "adf",
+    },
+    {
+      label: "Kwiatkowski-Phillips-Schmidt-Shin Test",
+      value: "kpss",
+    },
+    {
+      label: "Range unit root test",
+      value: "range_unit_root_test",
+    },
+    {
+      label: "ARMA",
+      value: "arma"
+    },
+    {
+      label: "ARIMA",
+      value: "arima"
+    }
+  ]
 };
 
 export namespace identifiers {
   export const DESCRIPTIVE_STATISTICS = "Descriptive statistics";
   export const INFERENTIAL_STATISTICS = "Inferential statistics";
+  export const TIME_SERIES_ANALYSIS = "Time series analysis";
 }
+
+export const TIME_SERIES_FREQUENCIES = [{
+  label: "Weekly",
+  value: "weekly"
+},{
+  label: "Monthly",
+  value: "monthly",
+}, {
+  label: "Quarterly",
+  value: "quarterly",
+}, {
+  label: "6 months",
+  value: "_6months",
+}, {
+  label: "Yearly",
+  value: "yearly",
+}];

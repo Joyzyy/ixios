@@ -129,8 +129,8 @@ const EquationsMenu: React.FC = () => {
                   <SelectGroup>
                     <SelectLabel>Transformations</SelectLabel>
                     <SelectItem value={"log"}>Log</SelectItem>
-                    <SelectItem value={"exp"}>Exp</SelectItem>
                     <SelectItem value={"sqrt"}>Sqrt</SelectItem>
+                    <SelectItem value={"diff"}>Diff</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
