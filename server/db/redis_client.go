@@ -8,7 +8,7 @@ import (
 
 func InitializeRedisClient() (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "redis:6379",
+		Addr: "127.0.0.1:6379",
 		TLSConfig: &tls.Config{
 			MinVersion: tls.VersionTLS12,
 			ServerName: "joylunow.dev",

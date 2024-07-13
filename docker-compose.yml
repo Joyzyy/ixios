@@ -7,9 +7,16 @@ services:
       - "8080:8080"
     links:
       - analysis_server
+      - redis_db
   analysis_server:
     build:
       context: ./analysis_server
       dockerfile: Dockerfile
     ports:
       - "50051:50051"
+  redis_db:
+    image: "redis-stack-server:latest"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ixios-db-persistent:/data
