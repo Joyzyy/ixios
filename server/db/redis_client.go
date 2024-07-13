@@ -6,7 +6,7 @@ import (
 
 func InitializeRedisClient() (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "redis_db",
+		Addr: "redis_db:6379",
 		DB:   0,
 	})
 	return rdb, nil
