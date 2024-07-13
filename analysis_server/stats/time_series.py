@@ -19,11 +19,13 @@ def calculate_autocorrelation(data: list[float], ts_specific: dict):
             result += f"\\text{i} & \\text{_acf[i]} & \\text{_pacf[i]} \\newline "
         result += "\\end{matrix}"
 
-        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        _, ax = plt.subplots(1, 2, figsize=(10, 5))
         plot_acf(_acf, ax=ax[0])
         plot_pacf(_pacf, ax=ax[1])
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
+        plt.cla()
+        plt.clf()
         buf.seek(0)
         autocorr_img = base64.b64encode(buf.read()).decode('utf-8')
         buf.close()

@@ -1,13 +1,19 @@
 package db
 
 import (
+	"crypto/tls"
+
 	"github.com/redis/go-redis/v9"
 )
 
 func InitializeRedisClient() (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "0.0.0.0:6379",
-		DB:   0,
+		Addr: "redis:6379",
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			ServerName: "joylunow.dev",
+		},
+		DB: 0,
 	})
 	return rdb, nil
 }

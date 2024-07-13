@@ -4,6 +4,7 @@ import {
   MenubarItem,
   MenubarLabel,
   MenubarMenu,
+  MenubarSeparator,
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
@@ -21,6 +22,7 @@ import {
 import { identifiers } from "@/constants";
 import { DataInputType } from "@/features/models";
 import { useToast } from "./ui/use-toast";
+import { Button } from "./ui/button";
 
 const FileMenu = () => {
   const setImportExportDialogAtom = useSetAtom(importExportDialogAtom);
@@ -171,14 +173,33 @@ export const UserAccountMenu = () => {
   const setUserAccountDialog = useSetAtom(userAccountDialogAtom);
   const [user, setUser] = useAtom(userAtom);
 
+  function IconCircleUser(props: any) {
+    return (
+      <svg
+        viewBox="0 0 512 512"
+        fill="currentColor"
+        height="1em"
+        width="1em"
+        {...props}
+      >
+        <path d="M399 384.2c-22.1-38.4-63.6-64.2-111-64.2h-64c-47.4 0-88.9 25.8-111 64.2 35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM512 256c0 141.4-114.6 256-256 256S0 397.4 0 256 114.6 0 256 0s256 114.6 256 256zm-256 16c39.8 0 72-32.2 72-72s-32.2-72-72-72-72 32.2-72 72 32.2 72 72 72z" />
+      </svg>
+    );
+  }
+
   return (
     <MenubarMenu>
-      <MenubarTrigger className="font-bold">IXIOS</MenubarTrigger>
-      <MenubarContent>
+      <MenubarTrigger className="font-bold" asChild>
+        <Button variant={"ghost"}>
+          <IconCircleUser className="w-full h-full" />
+        </Button>
+      </MenubarTrigger>
+      <MenubarContent className="mr-6">
         {user ? (
           <>
             <MenubarItem>{user.username}</MenubarItem>
             <MenubarItem>History</MenubarItem>
+            <MenubarSeparator />
             <MenubarItem
               onClick={() => {
                 setUser(null);
@@ -219,11 +240,16 @@ export const MainMenu = () => {
   const { toast } = useToast();
 
   return (
-    <Menubar className="rounded-none border-b border-none px-2 lg:px-4">
-      <UserAccountMenu />
-      <FileMenu />
-      <AnalysisMenu data={data} toastRef={toast} />
-      <GenerateMenu data={data} toastRef={toast} />
+    <Menubar className="flex flex-row justify-between rounded-none border-b border-none px-2 lg:px-4">
+      <div className="flex flex-row space-x-2">
+        <MenubarLabel>IXIOS</MenubarLabel>
+        <FileMenu />
+        <AnalysisMenu data={data} toastRef={toast} />
+        <GenerateMenu data={data} toastRef={toast} />
+      </div>
+      <div className="mr-8">
+        <UserAccountMenu />
+      </div>
     </Menubar>
   );
 };

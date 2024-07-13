@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"ixios-server/db"
 	"ixios-server/grpc"
 	"ixios-server/proto"
 	rest "ixios-server/rest_api"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/sashabaranov/go-openai"
+	"golang.org/x/net/context"
 )
 
 func main() {
@@ -22,11 +25,16 @@ func main() {
 	log.Println("Loaded .env")
 
 	// setup redis client
-	// rdb, err := db.InitializeRedisClient()
-	// if err != nil {
-	// 	log.Fatalf("encountered error while initializing redis client: %v", err)
-	// }
-	// defer rdb.Close()
+	rdb, err := db.InitializeRedisClient()
+	if err != nil {
+		log.Fatalf("encountered error while initializing redis client: %v", err)
+	}
+	defer rdb.Close()
+	command := rdb.Ping(context.Background())
+	if command.Err() != nil {
+		log.Fatalf("encountered error while pinging redis: %v", command.Err())
+	}
+	fmt.Println(command)
 	log.Println("Initialized Redis client")
 
 	// setup grpc client

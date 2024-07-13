@@ -1,4 +1,4 @@
-import { STATISTICS_FORMULAS } from "@/constants";
+import { API_URL_V1, STATISTICS_FORMULAS } from "@/constants";
 import { useState, useEffect } from "react";
 import { InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
@@ -71,7 +71,7 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
     if (currentAction !== identifiers.INFERENTIAL_STATISTICS) return;
     Object?.keys(steps)?.map(async (key) => {
       try {
-        // let completion = await fetch(`http://localhost:8080/v1/openai`, {
+        // let completion = await fetch(`${API_URL_V1}/openai`, {
         //   method: "POST",
         //   body: JSON.stringify({
         //     model: "gpt-3.5-turbo",
@@ -187,6 +187,71 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
 };
 
 const TimeSeriesAnalysisSteps: React.FC<TPropsStatistics> = ({ steps }) => {
+  const [interpretation, setInterpretation] = useState<any>({});
+  const currentAction = useAtomValue(currentActionAtom);
+
+  useEffect(() => {
+    if (!steps || currentAction !== identifiers.TIME_SERIES_ANALYSIS) return;
+    Object?.keys(steps)?.map((key) => {
+      steps[key].map(async (method: any) => {
+        try {
+          // let completion = await fetch(`${API_URL_V1}/openai`, {
+          //   method: "POST",
+          //   body: JSON.stringify({
+          //     model: "gpt-3.5-turbo",
+          //     messages: [
+          //       {
+          //         role: "system",
+          //         content: `You are going to interpret the results of the statistical data I have provided you. This is a ${JSON.parse(method.steps).method} test (made with statsmodels in python) on the ${key} variable. Get straight to the interpretation and the conclusion of the interpretation. That's it. Also, provide a markdown format for the interpretation.`,
+          //       },
+          //       {
+          //         role: "user",
+          //         content: JSON.stringify(method.steps),
+          //       },
+          //     ],
+          //   }),
+          // })
+          //   .then((res) => {
+          //     if (!res.ok) throw new Error("Failed to fetch completion");
+          //     return res.json();
+          //   })
+          //   .then((data) => data)
+          //   .catch((err) => {
+          //     throw new Error(err);
+          //   });
+          let completion = Object();
+          completion = completion?.response;
+          if (completion) {
+            if (completion.includes("```markdown")) {
+              let newContent = completion.replace("```markdown", "");
+              newContent = newContent.replace("```", "");
+              completion = newContent;
+            }
+            setInterpretation((prevInterpretation: any) => ({
+              ...prevInterpretation,
+              [key]: {
+                message: completion,
+                finished: true,
+              },
+            }));
+          } else {
+            setTimeout(() => {
+              setInterpretation((prevInterpretation: any) => ({
+                ...prevInterpretation,
+                [key]: {
+                  message: "Failed to fetch completion from the server.",
+                  finished: true,
+                },
+              }));
+            }, 2000);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    });
+  }, [steps, currentAction]);
+
   return (
     <>
       {Object.keys(steps).map((key) => (
@@ -196,11 +261,11 @@ const TimeSeriesAnalysisSteps: React.FC<TPropsStatistics> = ({ steps }) => {
           </h2>
           {steps[key].map((method: any) => (
             <>
-              <h3 className="text-xl font-semibold mb-2 mt-2">
+              <h3 className="text-xl font-semibold mb-2 mt-6">
                 {JSON.parse(method.steps).method}
               </h3>
-              <div className="rounded-lg border p-4 flex flex-row justify-center mb-2 w-full">
-                <ScrollArea className="h-1/2 w-full">
+              <div className="rounded-lg border p-4 flex flex-row justify-center mb-2 mt-2 w-full">
+                <ScrollArea className="max-h-[450px] w-full">
                   <div className="flex justify-center items-center">
                     {method &&
                       method.steps &&
@@ -221,6 +286,11 @@ const TimeSeriesAnalysisSteps: React.FC<TPropsStatistics> = ({ steps }) => {
                   </div>
                   <hr className="mt-2 mb-2 w-full" />
                   <p className="font-mono">Interpretation</p>
+                  {!interpretation[key] ? (
+                    <LoadingSpinner className={"mx-auto"} />
+                  ) : (
+                    <Markdown key={key}>{interpretation[key].message}</Markdown>
+                  )}
                   <ScrollBar orientation="vertical" />
                 </ScrollArea>
               </div>
