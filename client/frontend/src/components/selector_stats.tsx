@@ -264,10 +264,10 @@ const SelectorStats: React.FC = () => {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        setActionMenu("statistics_summary");
         return res.json();
       })
       .then((data) => {
+        setActionMenu("statistics_summary");
         if (!data.result) {
           setResults({
             steps: data,
