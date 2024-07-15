@@ -4,7 +4,7 @@ const STATISTIC_VARIABLES = "ABCDEFGHIJKLMNOPQRSTUVWZXY".split("").reverse();
 
 const NUMBER_PREDETERMINED = 2;
 
-const API_URL_V1 = "http://localhost:8080/v1";
+const API_URL_V1 = "http://joylunow.dev/v1";
 
 const STATISTICS_FORMULAS: {
   [key: string]: string;
