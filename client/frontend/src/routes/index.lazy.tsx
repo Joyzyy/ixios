@@ -5,6 +5,7 @@ import { SelectorStatsWrapper } from "@/components/selector_stats";
 import { GraphsMenuWrapper } from "@/components/graphs-menu";
 import { EquationsMenuWrapper } from "@/components/equations-menu";
 import { UserMenuWrapper } from "@/components/user-menu";
+import { UserHistoryWrapper } from "@/components/user-history";
 
 export const Route = createLazyFileRoute("/")({
   component: Index,
@@ -19,6 +20,7 @@ function Index() {
       <EquationsMenuWrapper />
       <SelectorStatsWrapper />
       <GraphsMenuWrapper />
+      <UserHistoryWrapper />
     </>
   );
 }

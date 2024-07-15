@@ -115,7 +115,7 @@ const RegisterDialog = (props: any) => {
     })
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Bad user credentials");
+          throw new Error("There was an error processing your request!");
         }
         return res.json();
       })
@@ -189,7 +189,7 @@ const RegisterDialog = (props: any) => {
       )}
       <DialogFooter>
         <Button type="submit" onClick={handleSubmit}>
-          Login
+          Register
         </Button>
       </DialogFooter>
     </>

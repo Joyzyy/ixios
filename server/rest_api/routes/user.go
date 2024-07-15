@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"ixios-server/db"
+	"ixios-server/rest_api/middlewares"
 	"ixios-server/rest_api/models"
 	"net/http"
 	"time"
@@ -83,7 +84,8 @@ func UserRoutes(router *http.ServeMux, rdb *redis.Client) {
 		}
 
 		user := db.User{
-			Username:          userRequest.Email,
+			Username:          userRequest.Username,
+			Email:             userRequest.Email,
 			Password:          string(hashedPassword),
 			OperationsHistory: []map[string]interface{}{},
 		}
@@ -125,13 +127,35 @@ func UserRoutes(router *http.ServeMux, rdb *redis.Client) {
 			return
 		}
 
-		userRequest := r.Context().Value("userId").(string)
+		email := r.Context().Value("email").(string)
+		userVal, err := rdb.Get(r.Context(), email).Result()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var user db.User
+		err = json.Unmarshal([]byte(userVal), &user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		operationsHistory, err := json.Marshal(user.OperationsHistory)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(userRequest))
+		_, err = w.Write(operationsHistory)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
 	router.Handle("POST /v1/user/login", login_route)
 	router.Handle("POST /v1/user/register", register_route)
-	router.Handle("GET /v1/user/history", history_route)
+	router.Handle("GET /v1/user/history", middlewares.UserAuthenticatedMiddleware(history_route))
 }

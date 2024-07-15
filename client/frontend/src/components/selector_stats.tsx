@@ -13,6 +13,7 @@ import {
   resultsAtom,
   currentActionAtom,
   equationsAtom,
+  userAtom,
 } from "@/features/atoms";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { DataTable } from "./action_menu/data-table";
@@ -69,6 +70,7 @@ const SelectorStats: React.FC = () => {
   const [tsFreq, setTsFreq] = useState("");
   const [tsFreqOpen, setTsFreqOpen] = useState(false);
   const [arima, setArima] = useState({ ar: 0, i: 0, ma: 0 });
+  const userValue = useAtomValue(userAtom);
 
   useEffect(() => {
     if (actionMenu === "selector_stats") {
@@ -253,6 +255,10 @@ const SelectorStats: React.FC = () => {
     fetch(requestBody.url, {
       method: "POST",
       body: JSON.stringify(requestBody.body),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userValue?.token}`,
+      },
     })
       .then((res) => {
         if (!res.ok) {
@@ -262,7 +268,11 @@ const SelectorStats: React.FC = () => {
         return res.json();
       })
       .then((data) => {
-        console.log("data: ", data);
+        if (!data.result) {
+          setResults({
+            steps: data,
+          });
+        }
         setResults({
           steps: data.result,
         });

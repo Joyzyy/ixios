@@ -6,13 +6,15 @@ import { identifiers } from "@/constants";
 import DOMPurify from "dompurify";
 import Markdown from "react-markdown";
 import { LoadingSpinner } from "../ui/spinner";
-import { useAtomValue } from "jotai";
-import { currentActionAtom } from "@/features/atoms";
+import { useAtomValue, useSetAtom } from "jotai";
+import { currentActionAtom, resultsAtom } from "@/features/atoms";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { finished } from "stream";
 
 type TProps = {
   steps: any;
   type: string;
+  time?: string;
 };
 
 type TPropsStatistics = {
@@ -20,6 +22,11 @@ type TPropsStatistics = {
 };
 
 const DescriptiveStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
+  const currentAction = useAtomValue(currentActionAtom);
+  useEffect(() => {
+    if (currentAction !== identifiers.DESCRIPTIVE_STATISTICS) return;
+  }, [steps]);
+
   return (
     <>
       {Object.keys(steps).map((key) => (
@@ -71,31 +78,30 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
     if (currentAction !== identifiers.INFERENTIAL_STATISTICS) return;
     Object?.keys(steps)?.map(async (key) => {
       try {
-        // let completion = await fetch(`${API_URL_V1}/openai`, {
-        //   method: "POST",
-        //   body: JSON.stringify({
-        //     model: "gpt-3.5-turbo",
-        //     messages: [
-        //       {
-        //         role: "system",
-        //         content: `You are going to interpret the results of the statistical data I have provided you. This is a ${key} test (made with statsmodels in python). Get straight to the interpretation and the conclusion of the interpretation. That's it. Also, provide a markdown format for the interpretation.`,
-        //       },
-        //       {
-        //         role: "user",
-        //         content: JSON.stringify(steps[key].steps),
-        //       },
-        //     ],
-        //   }),
-        // })
-        //   .then((res) => {
-        //     if (!res.ok) throw new Error("Failed to fetch completion");
-        //     return res.json();
-        //   })
-        //   .then((data) => data)
-        //   .catch((err) => {
-        //     throw new Error(err);
-        //   });
-        let completion = Object();
+        let completion = await fetch(`${API_URL_V1}/openai`, {
+          method: "POST",
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: `You are going to interpret the results of the statistical data I have provided you. This is a ${key} test (made with statsmodels in python). Get straight to the interpretation and the conclusion of the interpretation. That's it. Also, provide a markdown format for the interpretation.`,
+              },
+              {
+                role: "user",
+                content: JSON.stringify(steps[key].steps),
+              },
+            ],
+          }),
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch completion");
+            return res.json();
+          })
+          .then((data) => data)
+          .catch((err) => {
+            throw new Error(err);
+          });
         completion = completion?.response;
         if (completion) {
           if (completion.includes("```markdown")) {
@@ -177,7 +183,7 @@ const InferentialStatisticsSteps: React.FC<TPropsStatistics> = ({ steps }) => {
             {!interpretation[key] ? (
               <LoadingSpinner className={"mx-auto"} />
             ) : (
-              <Markdown key={key}>{interpretation[key].message}</Markdown>
+              <Markdown key={key}>{interpretation[key]}</Markdown>
             )}
           </div>
         </section>
@@ -191,127 +197,154 @@ const TimeSeriesAnalysisSteps: React.FC<TPropsStatistics> = ({ steps }) => {
   const currentAction = useAtomValue(currentActionAtom);
 
   useEffect(() => {
-    if (!steps || currentAction !== identifiers.TIME_SERIES_ANALYSIS) return;
-    Object?.keys(steps)?.map((key) => {
-      steps[key].map(async (method: any) => {
-        try {
-          // let completion = await fetch(`${API_URL_V1}/openai`, {
-          //   method: "POST",
-          //   body: JSON.stringify({
-          //     model: "gpt-3.5-turbo",
-          //     messages: [
-          //       {
-          //         role: "system",
-          //         content: `You are going to interpret the results of the statistical data I have provided you. This is a ${JSON.parse(method.steps).method} test (made with statsmodels in python) on the ${key} variable. Get straight to the interpretation and the conclusion of the interpretation. That's it. Also, provide a markdown format for the interpretation.`,
-          //       },
-          //       {
-          //         role: "user",
-          //         content: JSON.stringify(method.steps),
-          //       },
-          //     ],
-          //   }),
-          // })
-          //   .then((res) => {
-          //     if (!res.ok) throw new Error("Failed to fetch completion");
-          //     return res.json();
-          //   })
-          //   .then((data) => data)
-          //   .catch((err) => {
-          //     throw new Error(err);
-          //   });
-          let completion = Object();
-          completion = completion?.response;
-          if (completion) {
-            if (completion.includes("```markdown")) {
-              let newContent = completion.replace("```markdown", "");
-              newContent = newContent.replace("```", "");
-              completion = newContent;
+    if (Object.keys(steps).length === 0) {
+      return;
+    }
+    if (currentAction !== identifiers.TIME_SERIES_ANALYSIS) return;
+    steps &&
+      Object?.keys(steps)?.map((key) => {
+        steps &&
+          steps[key] &&
+          steps[key]?.map(async (method: any) => {
+            try {
+              const m = JSON.parse(method.steps).method;
+              let completion = await fetch(`${API_URL_V1}/openai`, {
+                method: "POST",
+                body: JSON.stringify({
+                  model: "gpt-3.5-turbo",
+                  messages: [
+                    {
+                      role: "system",
+                      content: `You are going to interpret the results of the statistical data I have provided you. This is a ${m} test (made with statsmodels in python), this being the ${key} variable. Get straight to the interpretation and the conclusion of the interpretation. That's it. Also, provide a markdown format for the interpretation.`,
+                    },
+                    {
+                      role: "user",
+                      content: JSON.stringify(method.steps),
+                    },
+                  ],
+                }),
+              })
+                .then((res) => {
+                  if (!res.ok) throw new Error("Failed to fetch completion");
+                  return res.json();
+                })
+                .then((data) => data)
+                .catch((err) => {
+                  throw new Error(err);
+                });
+              completion = completion?.response;
+              if (completion) {
+                if (completion.includes("```markdown")) {
+                  let newContent = completion.replace("```markdown", "");
+                  newContent = newContent.replace("```", "");
+                  completion = newContent;
+                }
+                setInterpretation((prevInterpretation: any) => ({
+                  ...prevInterpretation,
+                  [`${m}-${key}`]: completion,
+                }));
+              } else {
+                setTimeout(() => {
+                  setInterpretation((prevInterpretation: any) => ({
+                    ...prevInterpretation,
+                    [key]: {
+                      message: "Failed to fetch completion from the server.",
+                      finished: true,
+                    },
+                  }));
+                }, 2000);
+              }
+            } catch (err) {
+              console.error(err);
             }
-            setInterpretation((prevInterpretation: any) => ({
-              ...prevInterpretation,
-              [key]: {
-                message: completion,
-                finished: true,
-              },
-            }));
-          } else {
-            setTimeout(() => {
-              setInterpretation((prevInterpretation: any) => ({
-                ...prevInterpretation,
-                [key]: {
-                  message: "Failed to fetch completion from the server.",
-                  finished: true,
-                },
-              }));
-            }, 2000);
-          }
-        } catch (err) {
-          console.error(err);
-        }
+          });
       });
-    });
+
+    return () => {
+      setInterpretation({});
+    };
   }, [steps, currentAction]);
 
   return (
     <>
-      {Object.keys(steps).map((key) => (
-        <section key={key}>
-          <h2 className="mb-4 text-3xl font-bold">
-            Methods on variable: {key}
-          </h2>
-          {steps[key].map((method: any) => (
-            <>
-              <h3 className="text-xl font-semibold mb-2 mt-6">
-                {JSON.parse(method.steps).method}
-              </h3>
-              <div className="rounded-lg border p-4 flex flex-row justify-center mb-2 mt-2 w-full">
-                <ScrollArea className="max-h-[450px] w-full">
-                  <div className="flex justify-center items-center">
+      {steps &&
+        Object.keys(steps).map((key) => (
+          <section key={key}>
+            <h2 className="mb-4 text-3xl font-bold">
+              Methods on variable: {key}
+            </h2>
+            {steps &&
+              steps[key] &&
+              steps[key].map((method: any) => (
+                <>
+                  <h3 className="text-xl font-semibold mb-2 mt-6">
                     {method &&
                       method.steps &&
-                      JSON.parse(method.steps).html && (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(
-                              JSON.parse(method.steps).data
-                            ),
-                          }}
-                        />
-                      )}
-                    {method &&
+                      JSON.parse(method?.steps)?.method}
+                  </h3>
+                  <div className="rounded-lg border p-4 flex flex-row justify-center mb-2 mt-2 w-full">
+                    <ScrollArea className="max-h-[450px] w-full">
+                      <div className="flex justify-center items-center">
+                        {method &&
+                          method.steps &&
+                          JSON.parse(method.steps).html && (
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(
+                                  JSON.parse(method.steps).data
+                                ),
+                              }}
+                            />
+                          )}
+                        {method &&
+                          method.steps &&
+                          !JSON.parse(method.steps).html && (
+                            <InlineMath math={JSON.parse(method.steps).data} />
+                          )}
+                      </div>
+                      <hr className="mt-2 mb-2 w-full" />
+                      <p className="font-mono">Interpretation</p>
+                      {method &&
                       method.steps &&
-                      !JSON.parse(method.steps).html && (
-                        <InlineMath math={JSON.parse(method.steps).data} />
+                      interpretation[
+                        `${JSON.parse(method.steps).method}-${key}`
+                      ] ? (
+                        <Markdown key={key}>
+                          {
+                            interpretation[
+                              `${JSON.parse(method.steps).method}-${key}`
+                            ]
+                          }
+                        </Markdown>
+                      ) : (
+                        <LoadingSpinner className={"mx-auto"} />
                       )}
+                      <ScrollBar orientation="vertical" />
+                    </ScrollArea>
                   </div>
-                  <hr className="mt-2 mb-2 w-full" />
-                  <p className="font-mono">Interpretation</p>
-                  {!interpretation[key] ? (
-                    <LoadingSpinner className={"mx-auto"} />
-                  ) : (
-                    <Markdown key={key}>{interpretation[key].message}</Markdown>
-                  )}
-                  <ScrollBar orientation="vertical" />
-                </ScrollArea>
-              </div>
-              <div className="flex flex-row justify-center items-center">
-                {method &&
-                  method.graphs &&
-                  JSON.parse(method.graphs).length > 0 &&
-                  JSON.parse(method.graphs).map((graph: any) => (
-                    <img src={graph.data} alt={`${key} graph`} loading="lazy" />
-                  ))}
-              </div>
-            </>
-          ))}
-        </section>
-      ))}
+                  <div className="flex flex-row justify-center items-center">
+                    {method &&
+                      method.graphs &&
+                      JSON.parse(method.graphs).length > 0 &&
+                      JSON.parse(method.graphs).map((graph: any) => (
+                        <img
+                          src={graph.data}
+                          alt={`${key} graph`}
+                          loading="lazy"
+                        />
+                      ))}
+                  </div>
+                </>
+              ))}
+          </section>
+        ))}
     </>
   );
 };
 
-export const StepsComponent: React.FC<TProps> = ({ steps, type }) => {
+export const StepsComponent: React.FC<TProps> = ({ steps, type, time }) => {
   const [stepsData, setStepsData] = useState<any>({});
+  const currentAction = useAtomValue(currentActionAtom);
   useEffect(() => {
     try {
       if (typeof steps === "string") {
@@ -325,18 +358,31 @@ export const StepsComponent: React.FC<TProps> = ({ steps, type }) => {
         }
       } else {
         console.log("steps: ", steps);
-        setStepsData(steps);
+        if (
+          steps.result &&
+          currentAction === identifiers.TIME_SERIES_ANALYSIS
+        ) {
+          setStepsData(steps.result);
+        } else {
+          setStepsData(steps);
+        }
       }
     } catch (err) {
       console.error("err: ", err);
     }
+
+    return () => {
+      setStepsData({});
+    };
   }, [steps]);
 
   return (
     <div className="mx-auto max-w-4xl px-6">
       <header className="mb-10 space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tighter sm:text-xl md:text-4xl">
-          Statistical Result Walkthrough
+          {!time
+            ? "Statistical Result Walkthrough"
+            : "Statistial operation history from " + time}
         </h1>
         <p>
           Dive into the step-by-step calculations of the methods you've selected
